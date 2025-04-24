@@ -1,0 +1,2 @@
+/usr/bin/ar qc libfunlib.a CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o
+/usr/bin/ranlib libfunlib.a

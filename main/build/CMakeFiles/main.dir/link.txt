@@ -1,0 +1,1 @@
+/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ -fsycl CMakeFiles/main.dir/main.cpp.o -o main  /home/juanchuletas/Documents/Development/funlib/main/../library/build/libfunlib.a 
