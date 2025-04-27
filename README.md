@@ -79,37 +79,21 @@ Notes:
         b.print(); // Display result
     }
 
-📚 Library Structure
-
-funlib/
-├── include/
-│   └── funlib.hpp        # Main include file
-├── sycl/
-│   ├── sycl_handler.hpp  # SYCL device and queue management
-│   └── sycl_handler.cpp
-├── Matrix/
-│   ├── matrix.hpp        # Matrix Set class
-│   ├── matrix_impl.hpp   # Matrix Set implementation
-│   ├── matrix_op.hpp     # Operations declarations
-│   └── matrix_op_impl.hpp# Operations implementation
-├── CMakeLists.txt
-└── README.md
-
 📈 Roadmap
 
-Matrix and vector classes
+    Matrix and vector classes
 
-Matrix-matrix and matrix-vector product
+    Matrix-matrix and matrix-vector product
 
-SYCL GPU acceleration
+    SYCL GPU acceleration
 
-Conjugate Gradient solver
+    Conjugate Gradient solver
 
-Eigenvalue computation
+    Eigenvalue computation
 
-Sparse matrix support (CSR format)
+    Sparse matrix support (CSR format)
 
-    Preconditioners for iterative solvers
+        Preconditioners for iterative solvers
 
 📜 License
 
