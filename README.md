@@ -58,26 +58,26 @@ Notes:
 
 🚀 Quick Start Example
 
-#include "funlib.hpp"
+    #include "funlib.hpp"
 
-int main()
-{
-    flib::Set<double> A(3, 3);
-    flib::Set<double> x(3, 1);
+    int main()
+    {
+        flib::Set<double> A(3, 3);
+        flib::Set<double> x(3, 1);
 
-    // Fill matrix A and vector x
-    A(0,0) = 4; A(0,1) = 1; A(0,2) = 2;
-    A(1,0) = 1; A(1,1) = 3; A(1,2) = 0;
-    A(2,0) = 2; A(2,1) = 0; A(2,2) = 1;
-    
-    x(0,0) = 1;
-    x(1,0) = 2;
-    x(2,0) = 3;
+        // Fill matrix A and vector x
+        A(0,0) = 4; A(0,1) = 1; A(0,2) = 2;
+        A(1,0) = 1; A(1,1) = 3; A(1,2) = 0;
+        A(2,0) = 2; A(2,1) = 0; A(2,2) = 1;
+        
+        x(0,0) = 1;
+        x(1,0) = 2;
+        x(2,0) = 3;
 
-    auto b = prod(A, x); // Matrix-vector multiplication
+        auto b = prod(A, x); // Matrix-vector multiplication
 
-    b.print(); // Display result
-}
+        b.print(); // Display result
+    }
 
 📚 Library Structure
 
