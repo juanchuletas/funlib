@@ -1,6 +1,7 @@
 📚 funlib
 
 funlib is a lightweight, modular C++ linear algebra library focused on efficient matrix and vector operations. It is GPU-accelerated using SYCL, making it ideal for numerical simulations and scientific computing tasks such as Finite Element Methods (FEM).
+
 ✨ Features
 
     Matrix and Vector operations (row-major storage)
