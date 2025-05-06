@@ -25,6 +25,8 @@ namespace flib{
             //dot product of two vectors or two one dimensional sets
             template<typename T>
             static T dot(const Set<T>& A, const Set<T>& B);
+            template<typename T>
+            static T reduction(const Set<T>& A);
            
     
     };

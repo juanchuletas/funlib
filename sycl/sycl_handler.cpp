@@ -54,13 +54,15 @@ void flib::sycl_handler::sys_info()
                         case sycl::info::device_type::accelerator: deviceType = "Accelerator"; break;
                         default: deviceType = "Unknown";
                     }
-                    std::cout << "Device Type      : " << deviceType << std::endl;
+                    std::cout << "Device Type       : " << deviceType << std::endl;
                     
-                    std::cout << "Max Compute Units: " << device.get_info<sycl::info::device::max_compute_units>() << std::endl;
-                    std::cout << "Global Memory    : " 
+                    std::cout << "Max Compute Units : " << device.get_info<sycl::info::device::max_compute_units>() << std::endl;
+                    std::cout << "Global Memory     : " 
                               << device.get_info<sycl::info::device::global_mem_size>() / (1024 * 1024) 
                               << " MB" << std::endl;
-                    
+                    std::cout << "Local Memory      : " 
+                              << device.get_info<sycl::info::device::local_mem_size>() / (1024)
+                              << " MB" << std::endl;
                     // Work Item Info
                     std::cout << "Max Work Group Size   : " 
                               << device.get_info<sycl::info::device::max_work_group_size>() << std::endl;

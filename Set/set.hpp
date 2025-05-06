@@ -38,7 +38,11 @@ namespace flib{
         std::size_t getCols() const { return m_cols; }
 
         void print() const;
-
+        void fill(T value) {
+            for (std::size_t i = 0; i < m_rows * m_cols; ++i) {
+                m_data[i] = value;
+            }
+        }
     };
     // Typedefs
     using set = Set<double>;

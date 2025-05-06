@@ -30,5 +30,13 @@ int main() {
     xvec.print();
 
 
+    std::cout << "\n Reduction" << "\n";
+    std::size_t Nitems = 100000;
+    flib::fset  redvec(Nitems);
+    redvec.fill(1.0f);
+
+    float result = flib::set_operations::reduction(redvec);
+    std::cout << "Result: " << result << std::endl;
+
     return 0;
 }
