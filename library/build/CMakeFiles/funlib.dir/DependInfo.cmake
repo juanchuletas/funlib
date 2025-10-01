@@ -8,10 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o" "gcc" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o.d"
-  "/home/juanchuletas/Documents/Development/funlib/Set/set.cpp" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o" "gcc" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o.d"
-  "/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o" "gcc" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o.d"
-  "/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o" "gcc" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o.d"
+  "/home/juanchuletas/Documents/Development/funlib/source/linal.cpp" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o" "gcc" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o.d"
+  "/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o" "gcc" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o.d"
+  "/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o" "gcc" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o.d"
+  "/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o" "gcc" "CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

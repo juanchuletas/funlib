@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  set(CMAKE_INSTALL_PREFIX "/home/juanchuletas/Documents/Development/funlib/library/../install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -47,18 +47,11 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  include("/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles/funlib.dir/install-cxx-module-bmi-noconfig.cmake" OPTIONAL)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/juanchuletas/Documents/Development/funlib/library/../include/funlib")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE FILE FILES
-    "/home/juanchuletas/Documents/Development/funlib/library/../sycl/sycl_handler.hpp"
-    "/home/juanchuletas/Documents/Development/funlib/library/../ParticleSys/ParticleSystem.hpp"
-    "/home/juanchuletas/Documents/Development/funlib/library/../ParticleSet/particle_set.hpp"
-    "/home/juanchuletas/Documents/Development/funlib/library/../Set/set.hpp"
-    "/home/juanchuletas/Documents/Development/funlib/library/../Set/set_operations.hpp"
-    "/home/juanchuletas/Documents/Development/funlib/library/../LinearAlgebra/linal.hpp"
-    )
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/funlib" TYPE FILE FILES "/home/juanchuletas/Documents/Development/funlib/library/build/funlib.hpp")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)

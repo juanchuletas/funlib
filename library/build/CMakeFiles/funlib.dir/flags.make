@@ -4,7 +4,7 @@
 # compile CXX with /home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/juanchuletas/Documents/Development/funlib/library/../Matrix -I/home/juanchuletas/Documents/Development/funlib/library/../sycl -I/home/juanchuletas/Documents/Development/funlib/library/../include
+CXX_INCLUDES = -I/home/juanchuletas/Documents/Development/funlib/library/../include -isystem /usr/local/cuda/include
 
 CXX_FLAGS = -std=gnu++17 -fsycl
 

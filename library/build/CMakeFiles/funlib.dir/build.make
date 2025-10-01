@@ -69,76 +69,76 @@ include CMakeFiles/funlib.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/funlib.dir/flags.make
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o: CMakeFiles/funlib.dir/flags.make
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o: /home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o: CMakeFiles/funlib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o -MF CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o.d -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o -c /home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o: CMakeFiles/funlib.dir/flags.make
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o: /home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o: CMakeFiles/funlib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o -MF CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o.d -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o -c /home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.i"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp > CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.i
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.i"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp > CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.i
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.s"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.s
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.s"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.s
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o: CMakeFiles/funlib.dir/flags.make
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o: /home/juanchuletas/Documents/Development/funlib/Set/set.cpp
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o: CMakeFiles/funlib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o -MF CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o.d -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o -c /home/juanchuletas/Documents/Development/funlib/Set/set.cpp
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o: CMakeFiles/funlib.dir/flags.make
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o: /home/juanchuletas/Documents/Development/funlib/source/tensor.cpp
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o: CMakeFiles/funlib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o -MF CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o.d -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o -c /home/juanchuletas/Documents/Development/funlib/source/tensor.cpp
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.i"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/juanchuletas/Documents/Development/funlib/Set/set.cpp > CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.i
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.i"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/juanchuletas/Documents/Development/funlib/source/tensor.cpp > CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.i
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.s"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/juanchuletas/Documents/Development/funlib/Set/set.cpp -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.s
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.s"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/juanchuletas/Documents/Development/funlib/source/tensor.cpp -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.s
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o: CMakeFiles/funlib.dir/flags.make
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o: /home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o: CMakeFiles/funlib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o -MF CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o.d -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o -c /home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o: CMakeFiles/funlib.dir/flags.make
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o: /home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o: CMakeFiles/funlib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o -MF CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o.d -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o -c /home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.i"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp > CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.i
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.i"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp > CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.i
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.s"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.s
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.s"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.s
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o: CMakeFiles/funlib.dir/flags.make
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o: /home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o: CMakeFiles/funlib.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o -MF CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o.d -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o -c /home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o: CMakeFiles/funlib.dir/flags.make
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o: /home/juanchuletas/Documents/Development/funlib/source/linal.cpp
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o: CMakeFiles/funlib.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o -MF CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o.d -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o -c /home/juanchuletas/Documents/Development/funlib/source/linal.cpp
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.i"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp > CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.i
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.i"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/juanchuletas/Documents/Development/funlib/source/linal.cpp > CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.i
 
-CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.s"
-	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.s
+CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.s"
+	/home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/juanchuletas/Documents/Development/funlib/source/linal.cpp -o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.s
 
 # Object files for target funlib
 funlib_OBJECTS = \
-"CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o" \
-"CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o" \
-"CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o" \
-"CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o"
+"CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o" \
+"CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o" \
+"CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o" \
+"CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o"
 
 # External object files for target funlib
 funlib_EXTERNAL_OBJECTS =
 
-libfunlib.a: CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o
-libfunlib.a: CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o
-libfunlib.a: CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o
-libfunlib.a: CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o
+libfunlib.a: CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o
+libfunlib.a: CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o
+libfunlib.a: CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o
+libfunlib.a: CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o
 libfunlib.a: CMakeFiles/funlib.dir/build.make
 libfunlib.a: CMakeFiles/funlib.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/juanchuletas/Documents/Development/funlib/library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library libfunlib.a"

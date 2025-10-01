@@ -67,8 +67,8 @@ CMAKE_BINARY_DIR = /home/juanchuletas/Documents/Development/funlib/library/build
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "No interactive CMake dialog available..."
-	/usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running CMake cache editor..."
+	/usr/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -174,101 +174,101 @@ funlib/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/build
 .PHONY : funlib/fast
 
-home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.o: home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o
-.PHONY : home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.o
+home/juanchuletas/Documents/Development/funlib/source/linal.o: home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/linal.o
 
 # target to build an object file
-home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o
-.PHONY : home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.o
+home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o
 
-home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.i: home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.i
-.PHONY : home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.i
+home/juanchuletas/Documents/Development/funlib/source/linal.i: home/juanchuletas/Documents/Development/funlib/source/linal.cpp.i
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/linal.i
 
 # target to preprocess a source file
-home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.i
-.PHONY : home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.i
+home/juanchuletas/Documents/Development/funlib/source/linal.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.i
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/linal.cpp.i
 
-home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.s: home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.s
-.PHONY : home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.s
+home/juanchuletas/Documents/Development/funlib/source/linal.s: home/juanchuletas/Documents/Development/funlib/source/linal.cpp.s
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/linal.s
 
 # target to generate assembly for a file
-home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.s
-.PHONY : home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.cpp.s
+home/juanchuletas/Documents/Development/funlib/source/linal.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.s
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/linal.cpp.s
 
-home/juanchuletas/Documents/Development/funlib/Set/set.o: home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set.o
+home/juanchuletas/Documents/Development/funlib/source/sycl_handler.o: home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/sycl_handler.o
 
 # target to build an object file
-home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set.cpp.o
+home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o
 
-home/juanchuletas/Documents/Development/funlib/Set/set.i: home/juanchuletas/Documents/Development/funlib/Set/set.cpp.i
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set.i
+home/juanchuletas/Documents/Development/funlib/source/sycl_handler.i: home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.i
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/sycl_handler.i
 
 # target to preprocess a source file
-home/juanchuletas/Documents/Development/funlib/Set/set.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.i
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set.cpp.i
+home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.i
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.i
 
-home/juanchuletas/Documents/Development/funlib/Set/set.s: home/juanchuletas/Documents/Development/funlib/Set/set.cpp.s
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set.s
+home/juanchuletas/Documents/Development/funlib/source/sycl_handler.s: home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.s
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/sycl_handler.s
 
 # target to generate assembly for a file
-home/juanchuletas/Documents/Development/funlib/Set/set.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set.cpp.s
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set.cpp.s
+home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.s
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.s
 
-home/juanchuletas/Documents/Development/funlib/Set/set_operations.o: home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set_operations.o
+home/juanchuletas/Documents/Development/funlib/source/tensor.o: home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor.o
 
 # target to build an object file
-home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.o
+home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o
 
-home/juanchuletas/Documents/Development/funlib/Set/set_operations.i: home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.i
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set_operations.i
+home/juanchuletas/Documents/Development/funlib/source/tensor.i: home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.i
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor.i
 
 # target to preprocess a source file
-home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.i
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.i
+home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.i
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.i
 
-home/juanchuletas/Documents/Development/funlib/Set/set_operations.s: home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.s
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set_operations.s
+home/juanchuletas/Documents/Development/funlib/source/tensor.s: home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.s
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor.s
 
 # target to generate assembly for a file
-home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.s
-.PHONY : home/juanchuletas/Documents/Development/funlib/Set/set_operations.cpp.s
+home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.s
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.s
 
-home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.o: home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o
-.PHONY : home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.o
+home/juanchuletas/Documents/Development/funlib/source/tensor_operations.o: home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor_operations.o
 
 # target to build an object file
-home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o
-.PHONY : home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.o
+home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o
 
-home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.i: home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.i
-.PHONY : home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.i
+home/juanchuletas/Documents/Development/funlib/source/tensor_operations.i: home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.i
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor_operations.i
 
 # target to preprocess a source file
-home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.i
-.PHONY : home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.i
+home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.i
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.i
 
-home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.s: home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.s
-.PHONY : home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.s
+home/juanchuletas/Documents/Development/funlib/source/tensor_operations.s: home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.s
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor_operations.s
 
 # target to generate assembly for a file
-home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.s
-.PHONY : home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.cpp.s
+home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/funlib.dir/build.make CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.s
+.PHONY : home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.s
 
 # Help Target
 help:
@@ -283,18 +283,18 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... funlib"
-	@echo "... home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.o"
-	@echo "... home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.i"
-	@echo "... home/juanchuletas/Documents/Development/funlib/LinearAlgebra/linal.s"
-	@echo "... home/juanchuletas/Documents/Development/funlib/Set/set.o"
-	@echo "... home/juanchuletas/Documents/Development/funlib/Set/set.i"
-	@echo "... home/juanchuletas/Documents/Development/funlib/Set/set.s"
-	@echo "... home/juanchuletas/Documents/Development/funlib/Set/set_operations.o"
-	@echo "... home/juanchuletas/Documents/Development/funlib/Set/set_operations.i"
-	@echo "... home/juanchuletas/Documents/Development/funlib/Set/set_operations.s"
-	@echo "... home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.o"
-	@echo "... home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.i"
-	@echo "... home/juanchuletas/Documents/Development/funlib/sycl/sycl_handler.s"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/linal.o"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/linal.i"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/linal.s"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/sycl_handler.o"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/sycl_handler.i"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/sycl_handler.s"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/tensor.o"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/tensor.i"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/tensor.s"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/tensor_operations.o"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/tensor_operations.i"
+	@echo "... home/juanchuletas/Documents/Development/funlib/source/tensor_operations.s"
 .PHONY : help
 
 
