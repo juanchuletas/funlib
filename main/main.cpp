@@ -1,4 +1,4 @@
-#include "../include/funlib.hpp"
+#include <funlib/funlib.hpp>
 #include <iostream>
 
 
@@ -19,9 +19,9 @@ int main() {
     };
 
     std::vector<float> b = {1, 2, 0, 1, 3};
-    flib::fset  Amat(N, N, A.data());
-    flib::fset  bvec(N, b.data());
-    flib::fset  xvec(N);
+    flib::ftensor  Amat(N, N, A.data()); //ftsensor is a float tensor
+    flib::ftensor  bvec(N, b.data());
+    flib::ftensor  xvec(N);
 
     std::cout << "\n Conjugate Gradient" << "\n";
     flib::linal::conjugate_grad(Amat, bvec, xvec, 100);
@@ -30,13 +30,17 @@ int main() {
     xvec.print();
 
 
-    std::cout << "\n Reduction" << "\n";
+    std::cout << "\n Reduction  Algorithm" << "\n";
+    std::cout << "\n 1M vector" << "\n";
     std::size_t Nitems = 100000;
-    flib::fset  redvec(Nitems);
-    redvec.fill(1.0f);
+    flib::ftensor  redvec(Nitems);
+    redvec.fill(1.0f); // Fill the vector with 1.0f
 
-    float result = flib::set_operations::reduction(redvec);
+    float result = flib::tensor_operations::reduction(redvec); //Reduction of a first order tensor (vector)
     std::cout << "Result: " << result << std::endl;
+
+    flib::sycl_handler::get_platform_info();
+
 
     return 0;
 }
