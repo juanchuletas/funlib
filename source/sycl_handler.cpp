@@ -1,6 +1,7 @@
 #include <funlib/sycl/sycl_handler.hpp>
 
 
+
 void flib::sycl_handler::select_device(std::string device_name)
 {
     //Selects a SYCL Device to work with
@@ -124,6 +125,13 @@ void flib::sycl_handler::create_gl_interop_context()
     _syclCtx = sycl::make_context<sycl::backend::opencl>(_clCtx);
     _queue = sycl::queue(_syclCtx, _device, sycl::property::queue::in_order());
 
+}
+bool flib::sycl_handler::is_rtc_available()
+{
+   if(_queue.get_device().ext_oneapi_can_compile(sycl::ext::oneapi::experimental::source_language::sycl)) {
+        return true;
+    }
+    return false;
 }
 void flib::sycl_handler::get_device_info()
 {
