@@ -2,28 +2,45 @@
 
 
 
-void flib::sycl_handler::select_device(std::string device_name)
+void flib::sycl_handler::select_device(std::string device_name, std::string device_type, bool profiling)
 {
     //Selects a SYCL Device to work with
     //If no device is found, it throws an error
     //If this function is not called, uses a default device
     sycl::device selected_device;
-        for (const auto& platform : sycl::platform::get_platforms()) {
-            for (const auto& device : platform.get_devices()) {
-                std::string devname = device.get_info<sycl::info::device::name>();
-                //Lets pas the whole string to uppercase
-                std::transform(devname.begin(), devname.end(), devname.begin(), ::toupper);
-                std::transform(device_name.begin(), device_name.end(), device_name.begin(), ::toupper);
-                //Check if the devname s  tring contains the device_name string
-                if (devname.find(device_name) != std::string::npos) {
-                    _device = device;
-                    _queue = sycl::queue(_device);
-                    std::cout << "Selected Device : " << devname << std::endl;
-                    return;
+
+    // Convert device_type to SYCL device type enum if provided
+    bool filter_by_type = !device_type.empty();
+    sycl::info::device_type target_type;
+    if (filter_by_type) {
+        target_type = device_type_from_string(device_type);
+    }
+
+    for (const auto& platform : sycl::platform::get_platforms()) {
+        for (const auto& device : platform.get_devices()) {
+            std::string devname = device.get_info<sycl::info::device::name>();
+            //Lets pas the whole string to uppercase
+            std::transform(devname.begin(), devname.end(), devname.begin(), ::toupper);
+            std::transform(device_name.begin(), device_name.end(), device_name.begin(), ::toupper);
+
+            //Check if the devname string contains the device_name string
+            bool name_matches = devname.find(device_name) != std::string::npos;
+            bool type_matches = !filter_by_type || (device.get_info<sycl::info::device::device_type>() == target_type);
+
+            if (name_matches && type_matches) {
+                _device = device;
+                if(profiling){
+                     _queue = sycl::queue(_device,sycl::property::queue::enable_profiling{});
+                      std::cout << "Selected Device : " << devname << std::endl;
+                      return;
                 }
-    
+                _queue = sycl::queue(_device);
+                std::cout << "Selected Device : " << devname << std::endl;
+                return;
             }
+
         }
+    }
     throw std::runtime_error("SYCL: Device not found!");
 }
 
