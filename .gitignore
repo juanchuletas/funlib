@@ -4,9 +4,10 @@ build/
 release/
 library/
 main/
-
+install/
 # Build directories (recursive)
 **/build/
 **/release/
 **/library/
 **/main/
+**/install/
