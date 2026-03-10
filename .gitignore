@@ -8,3 +8,5 @@ main/
 # Build directories (recursive)
 **/build/
 **/release/
+**/library/
+**/main/
