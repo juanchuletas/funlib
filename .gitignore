@@ -1,0 +1,10 @@
+# Ignore build artifacts
+# Build directories
+build/
+release/
+library/
+main/
+
+# Build directories (recursive)
+**/build/
+**/release/

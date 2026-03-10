@@ -19,26 +19,25 @@ void flib::sycl_handler::select_device(std::string device_name, std::string devi
     for (const auto& platform : sycl::platform::get_platforms()) {
         for (const auto& device : platform.get_devices()) {
             std::string devname = device.get_info<sycl::info::device::name>();
-            //Lets pas the whole string to uppercase
             std::transform(devname.begin(), devname.end(), devname.begin(), ::toupper);
             std::transform(device_name.begin(), device_name.end(), device_name.begin(), ::toupper);
 
-            //Check if the devname string contains the device_name string
             bool name_matches = devname.find(device_name) != std::string::npos;
             bool type_matches = !filter_by_type || (device.get_info<sycl::info::device::device_type>() == target_type);
 
             if (name_matches && type_matches) {
                 _device = device;
                 if(profiling){
-                     _queue = sycl::queue(_device,sycl::property::queue::enable_profiling{});
-                      std::cout << "Selected Device : " << devname << std::endl;
-                      return;
+                    _queue = sycl::queue(_device, sycl::property::queue::enable_profiling{});
+                    _queues["default"] = _queue;
+                    std::cout << "Selected Device : " << devname << std::endl;
+                    return;
                 }
                 _queue = sycl::queue(_device);
+                _queues["default"] = _queue;
                 std::cout << "Selected Device : " << devname << std::endl;
                 return;
             }
-
         }
     }
     throw std::runtime_error("SYCL: Device not found!");
@@ -83,7 +82,7 @@ void flib::sycl_handler::select_backend_device(const std::string &platform_filte
     std::string device_type_filter = device_filter;
     std::transform(target_platform.begin(), target_platform.end(), target_platform.begin(), ::toupper);
     std::transform(device_type_filter.begin(), device_type_filter.end(), device_type_filter.begin(), ::toupper);
-     
+
     sycl::info::device_type target_type = device_type_from_string(device_type_filter);
 
     for (const auto& platform : sycl::platform::get_platforms()) {
@@ -93,8 +92,9 @@ void flib::sycl_handler::select_backend_device(const std::string &platform_filte
             for (const auto& device : platform.get_devices()) {
                 if (device.get_info<sycl::info::device::device_type>() == target_type) {
                     _device = device;
-                    _queue = sycl::queue(_device);
                     _platform = platform;
+                    _queue = sycl::queue(_device);
+                    _queues["default"] = _queue;
                     std::cout << "Selected Device : "
                                 << _device.get_info<sycl::info::device::name>() << "\n";
                     std::cout << "   Platform        : "
@@ -110,16 +110,22 @@ void flib::sycl_handler::select_backend_device(const std::string &platform_filte
                                 platform_filter + "' and device type '" + device_type_filter + "'");
 }
 
-void flib::sycl_handler::create_gl_interop_context()
+void flib::sycl_handler::create_gl_interop_context(const std::string& name)
 {
+    auto it = _queues.find(name);
+    if (it == _queues.end())
+        throw std::runtime_error("Queue not found: " + name);
+
+    sycl::device dev = it->second.get_device();
+    sycl::platform plt = dev.get_platform();
+
     auto glxContext = glXGetCurrentContext();
-    auto glxDisplay = glXGetCurrentDisplay(); //returns the display for the current context.
+    auto glxDisplay = glXGetCurrentDisplay();
     if (!glxContext || !glxDisplay)
         throw std::runtime_error("OpenGL context is not current in this thread.");
 
-    //Creates based on the user selected device and platform
-    cl_platform_id clPlatform = sycl::get_native<sycl::backend::opencl>(_platform);
-    cl_device_id clDev = sycl::get_native<sycl::backend::opencl>(_device);
+    cl_platform_id clPlatform = sycl::get_native<sycl::backend::opencl>(plt);
+    cl_device_id clDev = sycl::get_native<sycl::backend::opencl>(dev);
 
     char extensions[2048];
     clGetDeviceInfo(clDev, CL_DEVICE_EXTENSIONS, sizeof(extensions), extensions, nullptr);
@@ -140,26 +146,22 @@ void flib::sycl_handler::create_gl_interop_context()
         throw std::runtime_error("Failed to create OpenCL context for OpenGL interoperability.");
 
     _syclCtx = sycl::make_context<sycl::backend::opencl>(_clCtx);
-    _queue = sycl::queue(_syclCtx, _device, sycl::property::queue::in_order());
-
+    _queues[name] = sycl::queue(_syclCtx, dev, sycl::property::queue::in_order());
 }
-bool flib::sycl_handler::is_rtc_available()
+bool flib::sycl_handler::is_rtc_available(const std::string& name)
 {
-   if(_queue.get_device().ext_oneapi_can_compile(sycl::ext::oneapi::experimental::source_language::sycl)) {
-        return true;
-    }
-    return false;
+    sycl::queue q = name.empty() ? _queue : get_queue(name);
+    return q.get_device().ext_oneapi_can_compile(sycl::ext::oneapi::experimental::source_language::sycl);
 }
-void flib::sycl_handler::get_device_info()
+void flib::sycl_handler::get_device_info(const std::string& name)
 {
-    //Prints the current device 
-   
-    std::cout << "Current Device for computations : " 
-        << _queue.get_device().get_info<sycl::info::device::name>()<<std::endl;
+    sycl::queue q = name.empty() ? _queue : get_queue(name);
 
+    std::cout << "Current Device for computations : "
+        << q.get_device().get_info<sycl::info::device::name>() << std::endl;
 
-    sycl::device dev = _queue.get_device();
-    sycl::context ctx = _queue.get_context();
+    sycl::device dev = q.get_device();
+    sycl::context ctx = q.get_context();
     sycl::platform plt = dev.get_platform();
     
 
@@ -252,6 +254,54 @@ sycl::info::device_type flib::sycl_handler::device_type_from_string(const std::s
             throw std::runtime_error("Invalid device type string: " + type_str);
     
 }
+void flib::sycl_handler::register_queue(const std::string& name, flib::device device_type,
+                                         flib::vendor vendor_type, flib::backend backend_type)
+{
+    // Validate vendor/backend combinations
+    if (vendor_type == flib::vendor::NVIDIA &&
+        (backend_type == flib::backend::OPENCL || backend_type == flib::backend::LEVEL_ZERO))
+        throw std::runtime_error("NVIDIA does not support OpenCL or Level-Zero backends");
+
+    if (vendor_type == flib::vendor::INTEL && backend_type == flib::backend::CUDA)
+        throw std::runtime_error("Intel does not support CUDA backend");
+
+    // Map enums to uppercase filter strings
+    std::string vendor_str  = (vendor_type  == flib::vendor::INTEL)       ? "INTEL"      : "NVIDIA";
+    std::string backend_str = (backend_type == flib::backend::OPENCL)     ? "OPENCL"     :
+                              (backend_type == flib::backend::LEVEL_ZERO) ? "LEVEL-ZERO" : "CUDA";
+    sycl::info::device_type target_type = (device_type == flib::device::GPU)
+                                        ? sycl::info::device_type::gpu
+                                        : sycl::info::device_type::cpu;
+
+    for (const auto& platform : sycl::platform::get_platforms()) {
+        std::string pname = platform.get_info<sycl::info::platform::name>();
+        std::transform(pname.begin(), pname.end(), pname.begin(), ::toupper);
+        if (pname.find(backend_str) == std::string::npos) continue;
+
+        for (const auto& dev : platform.get_devices()) {
+            std::string vname = dev.get_info<sycl::info::device::vendor>();
+            std::transform(vname.begin(), vname.end(), vname.begin(), ::toupper);
+            if (vname.find(vendor_str) == std::string::npos) continue;
+            if (dev.get_info<sycl::info::device::device_type>() != target_type) continue;
+
+            _queues[name] = sycl::queue(dev);
+            std::cout << "Registered queue '" << name << "' -> "
+                      << dev.get_info<sycl::info::device::name>()
+                      << " [" << backend_str << "]\n";
+            return;
+        }
+    }
+    throw std::runtime_error("register_queue: no matching device found for '" + name + "'");
+}
+
+sycl::queue flib::sycl_handler::get_queue(const std::string& name)
+{
+    auto it = _queues.find(name);
+    if (it == _queues.end())
+        throw std::runtime_error("Queue not found: " + name);
+    return it->second;
+}
+
 sycl::queue flib::sycl_handler::get_queue()
 {
     return _queue;
@@ -267,7 +317,8 @@ sycl::context flib::sycl_handler::get_sycl_context()
 // Initialize static members
 sycl::device flib::sycl_handler::_device;
 sycl::platform flib::sycl_handler::_platform;
-cl_context flib::sycl_handler::_clCtx = nullptr; // Initialize OpenCL context
-sycl::queue  flib::sycl_handler::_queue{sycl::default_selector_v}; //Default queue
+cl_context flib::sycl_handler::_clCtx = nullptr;
+sycl::queue  flib::sycl_handler::_queue{sycl::default_selector_v};
 sycl::context flib::sycl_handler::_syclCtx;
+std::map<std::string, sycl::queue> flib::sycl_handler::_queues;
 
