@@ -255,7 +255,7 @@ sycl::info::device_type flib::sycl_handler::device_type_from_string(const std::s
     
 }
 void flib::sycl_handler::register_queue(const std::string& name, flib::device device_type,
-                                         flib::vendor vendor_type, flib::backend backend_type)
+                                         flib::vendor vendor_type, flib::backend backend_type, bool profiling)
 {
     // Validate vendor/backend combinations
     if (vendor_type == flib::vendor::NVIDIA &&
@@ -283,11 +283,15 @@ void flib::sycl_handler::register_queue(const std::string& name, flib::device de
             std::transform(vname.begin(), vname.end(), vname.begin(), ::toupper);
             if (vname.find(vendor_str) == std::string::npos) continue;
             if (dev.get_info<sycl::info::device::device_type>() != target_type) continue;
-
-            _queues[name] = sycl::queue(dev);
+            if(profiling){
+                _queues[name] = sycl::queue(dev, sycl::property::queue::enable_profiling{});
+            } else {
+                _queues[name] = sycl::queue(dev);
+            }
             std::cout << "Registered queue '" << name << "' -> "
                       << dev.get_info<sycl::info::device::name>()
                       << " [" << backend_str << "]\n";
+            std::cout << "Profiling enabled: " << (profiling ? "Yes" : "No") << "\n";
             return;
         }
     }
@@ -321,4 +325,3 @@ cl_context flib::sycl_handler::_clCtx = nullptr;
 sycl::queue  flib::sycl_handler::_queue{sycl::default_selector_v};
 sycl::context flib::sycl_handler::_syclCtx;
 std::map<std::string, sycl::queue> flib::sycl_handler::_queues;
-

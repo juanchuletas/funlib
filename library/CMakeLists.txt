@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.15)
+set(CMAKE_CXX_COMPILER /home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++)
 project(funlib VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 # SYCL Configuration
-set(CMAKE_CXX_COMPILER /home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++)
-add_compile_options(-fsycl)
+message("DPCPP compiler path: ${CMAKE_CXX_COMPILER}")
+# Add funlib
+set(FUNLIB_SYCL_TARGETS spir64,nvptx64-nvidia-cuda)
+add_compile_options(-fsycl -fsycl-targets=${FUNLIB_SYCL_TARGETS})
 # Find OpenCL package (required for cl_gl.h)
 find_package(OpenCL REQUIRED)
 # Source folders
@@ -33,7 +36,7 @@ set(HEADER_FILES
 # Create static library
 add_library(funlib STATIC ${SOURCE_FILES} ${HEADER_FILES})
 # Link OpenCL
-target_link_libraries(funlib PUBLIC OpenCL::OpenCL)
+target_link_libraries(funlib PUBLIC OpenCL::OpenCL GL)
 # CRITICAL: Set up include directories
 # During development: allows #include <funlib/Tensor/tensor.hpp> to work
 # After install: users can #include <funlib/Tensor/tensor.hpp>
@@ -72,8 +75,6 @@ file(WRITE ${FUNLIB_MAIN_HEADER}
 #include <funlib/Tensor/tensor_operations.hpp>
 #include <funlib/sycl/sycl_handler.hpp>
 #include <funlib/LinearAlgebra/linal.hpp>
-#include <funlib/ParticleSet/particle_set.hpp>
-#include <funlib/ParticleSys/ParticleSystem.hpp>
 
 #endif // FUNLIB_HPP
 ")

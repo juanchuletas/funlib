@@ -1,13 +1,9 @@
-# Ignore build artifacts
 # Build directories
-build/
-release/
-library/
-main/
-install/
-# Build directories (recursive)
 **/build/
 **/release/
-**/library/
-**/main/
-**/install/
+
+# Generated installation files
+/install/
+
+# Editor files
+.vscode/
