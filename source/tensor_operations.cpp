@@ -24,6 +24,43 @@ namespace flib
             throw std::invalid_argument("Tensor dimensions do not match for multiplication");
         }
 
+        if(A.is_device() || B.is_device())
+        {
+            if(!A.is_device() || !B.is_device()){
+                throw std::invalid_argument("GEMM inputs must use the same memory location");
+            }
+            if(!A.is_accessible_from(Q) || !B.is_accessible_from(Q))
+            {
+                throw std::invalid_argument("GEMM queue cannot access the input tensors");
+            }
+
+            const T* dataA = A.device_data();
+            const T* dataB = B.device_data();
+            Tensor<T> C(rowsC, colsC, Q);
+            T* dataC = C.device_data();
+
+            sycl::event event = Q.submit([&](sycl::handler &cgh){
+                cgh.parallel_for(
+                    sycl::range<2>{rowsC, colsC},
+                    [=](sycl::item<2> item){
+                        size_t i = item.get_id(0);
+                        size_t j = item.get_id(1);
+                        T sum = T(0);
+                        for(size_t k = 0; k < colsA; k++)
+                        {
+                            sum += dataA[i * colsA + k] * dataB[k * colsB + j];
+                        }
+                        dataC[i * colsC + j] = sum;
+                    });
+            });
+
+            if(kernel_event != nullptr){
+                *kernel_event = event;
+            }
+            event.wait();
+            return C;
+        }
+
         Tensor<T> C(rowsC, colsC); //output matrix
         { //Sycl scope
             sycl::buffer<T, 1> buffc  = C.to_sycl_buffer();
