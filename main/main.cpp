@@ -36,7 +36,8 @@ int main() {
     flib::ftensor  redvec(Nitems);
     redvec.fill(1.0f); // Fill the vector with 1.0f
 
-    float result = flib::tensor_operations::reduction(redvec); //Reduction of a first order tensor (vector)
+    sycl::queue Q = flib::sycl_handler::get_queue();
+    float result = flib::tensor_operations::reduction(redvec, Q); //Reduction of a first order tensor (vector)
     std::cout << "Result: " << result << std::endl;
 
     flib::sycl_handler::get_platform_info();

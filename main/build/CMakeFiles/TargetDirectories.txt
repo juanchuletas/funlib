@@ -1,3 +1,0 @@
-/home/juanchuletas/Documents/Development/funlib/main/build/CMakeFiles/main.dir
-/home/juanchuletas/Documents/Development/funlib/main/build/CMakeFiles/edit_cache.dir
-/home/juanchuletas/Documents/Development/funlib/main/build/CMakeFiles/rebuild_cache.dir

@@ -1,4 +1,5 @@
 #include <funlib/LinearAlgebra/linal.hpp>
+#include <funlib/sycl/sycl_handler.hpp>
 namespace flib
 {
     
@@ -7,6 +8,7 @@ namespace flib
         template<typename T>
         void conjugate_grad(const Tensor<T>& A, const Tensor<T> & b, Tensor<T> & x, int max_iter, T tol){
             std::size_t N = b.getRows();
+            sycl::queue Q = flib::sycl_handler::get_queue();
             
             if(A.getRows() != N || A.getCols() != N || b.getCols() != 1 || x.getCols() != 1 || x.getRows() != N){
                 throw std::invalid_argument("Matrix and vector dimensions do not match");
@@ -18,7 +20,7 @@ namespace flib
 
             //Computing the inital residual
 
-            r = flib::tensor_operations::prod(A, x);
+            r = flib::tensor_operations::prod(A, x, Q);
             //std::cout << "Initial residual: "<< "\n";
             //r.print();
             for(std::size_t i = 0; i < N; i++){
@@ -28,22 +30,22 @@ namespace flib
             //r.print();
             p = r;
 
-            T old_r = flib::tensor_operations::dot(r, r);
+            T old_r = flib::tensor_operations::dot(r, r, Q);
             // std::cout << "Initial residual: "<< old_r << "\n";
             int iter = 0;
             while(iter < max_iter){
 
-                Ap = flib::tensor_operations::prod(A, p);
+                Ap = flib::tensor_operations::prod(A, p, Q);
                 //std::cout << "Matrix times vector: "<< "\n";
                 //Ap.print();
-                T denominator = flib::tensor_operations::dot(p, Ap);
+                T denominator = flib::tensor_operations::dot(p, Ap, Q);
                 T alpha = old_r / denominator;
 
                 for(std::size_t i = 0; i < N; i++){
                     x[i] = x[i] + alpha * p[i]; //updates the solution
                     r[i] = r[i] - alpha * Ap[i]; //updates the residual
                 }   
-                T new_r = flib::tensor_operations::dot(r, r);
+                T new_r = flib::tensor_operations::dot(r, r, Q);
                 T currTol = std::sqrt(new_r);
                 if(currTol < tol){
                     std::cout << "Converged in " << iter + 1 << " iterations.\n";

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libfunlib.a CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/sycl_handler.cpp.o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor.cpp.o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/tensor_operations.cpp.o CMakeFiles/funlib.dir/home/juanchuletas/Documents/Development/funlib/source/linal.cpp.o
-/usr/bin/ranlib libfunlib.a

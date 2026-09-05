@@ -3,6 +3,7 @@ project(FunlibProject)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER /home/juanchuletas/Documents/Development/sycl_workspace/llvm/build/bin/clang++)
+set(FUNLIB_SYCL_TARGETS spir64,nvptx64-nvidia-cuda)
 include_directories(${CMAKE_SOURCE_DIR}/../include)
 
 # Add the static library
@@ -24,6 +25,6 @@ find_package(OpenCL REQUIRED)
 add_executable(main main.cpp)
 
 # Link the static library
-target_link_libraries(main PRIVATE funlib)
-target_compile_options(main PRIVATE -fsycl)
-target_link_options(main PRIVATE -fsycl)
+target_link_libraries(main PRIVATE funlib OpenCL::OpenCL GL)
+target_compile_options(main PRIVATE -fsycl -fsycl-targets=${FUNLIB_SYCL_TARGETS})
+target_link_options(main PRIVATE -fsycl -fsycl-targets=${FUNLIB_SYCL_TARGETS})
