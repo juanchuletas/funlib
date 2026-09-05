@@ -265,4 +265,4 @@ The next main steps are:
 
 ## License
 
-Funlib is available under the MIT License.
+Funlib is available under the APACHE License.
