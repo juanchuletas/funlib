@@ -121,7 +121,7 @@ Funlib contains several GEMM methods because one method does not give the best r
 
 The current methods are:
 
-1. `gemm`
+1. `gemm_naive`
 
    This is the basic matrix multiplication method.
 
@@ -137,7 +137,9 @@ The current methods are:
 
    This method combines local memory tiles with 2x2 register blocking.
 
-The benchmark results show that Intel and NVIDIA GPUs do not always prefer the same method. Future work will add automatic selection based on the device and matrix dimensions.
+Normal users can call `gemm`. This method selects one of the GEMM methods based on the selected backend and matrix dimensions.
+
+The benchmark results show that Intel and NVIDIA GPUs do not always prefer the same method. The `gemm` method now selects an implementation based on the device backend and matrix dimensions. More benchmark data will improve these rules later.
 
 
 ## Basic device tensor example
@@ -172,8 +174,7 @@ int main()
     A.copy_from(hostA.data(), queue).wait();
     B.copy_from(hostB.data(), queue).wait();
     //Uses gpu acceleration
-    flib::ftensor C =
-        flib::tensor_operations::gemm_tiled_blocked2x2(A,B,queue); 
+    flib::ftensor C = flib::tensor_operations::gemm(A, B, queue);
 
     std::vector<float> hostC = C.to_host(queue);
 

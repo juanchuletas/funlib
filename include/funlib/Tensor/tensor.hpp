@@ -1,6 +1,7 @@
 #if !defined(_TENSOR_HPP_)
 #define _TENSOR_HPP_
 #include <memory>
+#include <initializer_list>
 #include <iostream>
 #include <iomanip>
 #include <optional>
@@ -16,7 +17,8 @@ namespace flib{
         std::size_t m_cols;
         std::size_t m_gsize;
         std::unique_ptr<T[]> m_data;
-        T* m_device_data;
+        T* m_device_data = nullptr;
+        std::vector<std::size_t> m_shape;
         std::optional<sycl::context> m_context;
         std::optional<sycl::device> m_device;
 
@@ -30,6 +32,13 @@ namespace flib{
         Tensor(std::size_t rows);
         Tensor(std::size_t rows, T* value);
         Tensor(std::size_t rows, std::size_t cols, sycl::queue queue);
+        //New Tensor constructor for N dimensional tensors,
+        Tensor(std::initializer_list<std::size_t>, sycl::queue queue);
+        Tensor(std::initializer_list<std::size_t>, T* value);
+        Tensor(std::initializer_list<std::size_t>);
+        Tensor(const std::vector<std::size_t>& shape, sycl::queue queue);
+        Tensor(const std::vector<std::size_t>& shape, T* value);
+        Tensor(const std::vector<std::size_t>& shape);
         Tensor(const Tensor<T>& other);
         Tensor(Tensor<T>&& other) noexcept;
         ~Tensor();
@@ -59,6 +68,8 @@ namespace flib{
         //getters
         std::size_t getRows() const { return m_rows; }
         std::size_t getCols() const { return m_cols; }
+        std::size_t getRank() const { return m_shape.size(); }
+        const std::vector<std::size_t>& getShape() const { return m_shape; }
 
         void print() const;
         void fill(T value) {

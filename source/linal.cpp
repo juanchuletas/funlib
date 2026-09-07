@@ -20,7 +20,7 @@ namespace flib
 
             //Computing the inital residual
 
-            r = flib::tensor_operations::prod(A, x, Q);
+            r = flib::tensor_operations::matxvec(A, x, Q);
             //std::cout << "Initial residual: "<< "\n";
             //r.print();
             for(std::size_t i = 0; i < N; i++){
@@ -35,7 +35,7 @@ namespace flib
             int iter = 0;
             while(iter < max_iter){
 
-                Ap = flib::tensor_operations::prod(A, p, Q);
+                Ap = flib::tensor_operations::matxvec(A, p, Q);
                 //std::cout << "Matrix times vector: "<< "\n";
                 //Ap.print();
                 T denominator = flib::tensor_operations::dot(p, Ap, Q);
