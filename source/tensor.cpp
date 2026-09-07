@@ -15,67 +15,47 @@ namespace flib{
         m_device = std::nullopt;
     }
     template <typename T>
-    Tensor<T>::Tensor(std::size_t rows, std::size_t cols)
-    {
-        this->m_rows = rows;
-        this->m_cols = cols;
-        m_gsize = rows * cols;
-        m_device_data = nullptr;
-        m_context = std::nullopt;
-        m_device = std::nullopt;
-        m_data = std::make_unique<T[]>(m_rows * m_cols);
-        for (std::size_t i = 0; i < m_rows * m_cols; ++i) {
-            m_data[i] = T(0); // Initialize with default value
-        }
-    }
+    Tensor<T>::Tensor(std::size_t rows, std::size_t cols) : Tensor({rows, cols}) {}
+
     template <typename T>
-    Tensor<T>::Tensor(std::size_t rows, std::size_t cols, T* value)
-    {
-        this->m_rows = rows;
-        this->m_cols = cols;
-        m_gsize = rows * cols;
-        m_device_data = nullptr;
-        m_context = std::nullopt;
-        m_device = std::nullopt;
-        m_data = std::make_unique<T[]>(m_rows * m_cols);
-        for (std::size_t i = 0; i < m_rows * m_cols; ++i) {
-            m_data[i] = value[i]; // Initialize with provided values
-        }
-    }
+    Tensor<T>::Tensor(std::size_t rows, std::size_t cols, T* value) : Tensor({rows, cols}, value) {}
+
     template <typename T>
-    Tensor<T>::Tensor(std::size_t rows)
-    {
-        this->m_rows = rows;
-        this->m_cols = 1;
-        m_gsize = rows;
-        m_device_data = nullptr;
-        m_context = std::nullopt;
-        m_device = std::nullopt;
-        m_data = std::make_unique<T[]>(m_rows * m_cols);
-        for (std::size_t i = 0; i < m_rows * m_cols; ++i) {
-            m_data[i] = T(0); // Initialize with default value
-        }
-    }
+    Tensor<T>::Tensor(std::size_t rows) : Tensor({rows, 1}) {}
+
     template <typename T>
-    Tensor<T>::Tensor(std::size_t rows, T *value)
-    {
-        this->m_rows = rows;
-        this->m_cols = 1;
-        m_gsize = rows;
-        m_device_data = nullptr;
-        m_context = std::nullopt;
-        m_device = std::nullopt;
-        m_data = std::make_unique<T[]>(m_rows * m_cols);
-        for (std::size_t i = 0; i < m_rows * m_cols; ++i) {
-            m_data[i] = value[i]; // Initialize with provided values
-        }
-    }
+    Tensor<T>::Tensor(std::size_t rows, T *value) : Tensor({rows, 1}, value) {}
+
     template <typename T>
-    Tensor<T>::Tensor(std::size_t rows, std::size_t cols, sycl::queue queue)
+    Tensor<T>::Tensor(std::size_t rows, std::size_t cols, sycl::queue queue) : Tensor({rows, cols}, queue) {}
+
+    template <typename T>
+    Tensor<T>::Tensor(std::initializer_list<std::size_t> shape, sycl::queue queue) :
+        Tensor(std::vector<std::size_t>(shape), queue) {}
+
+    template <typename T>
+    Tensor<T>::Tensor(std::initializer_list<std::size_t> shape) :
+        Tensor(std::vector<std::size_t>(shape)) {}
+
+    template <typename T>
+    Tensor<T>::Tensor(std::initializer_list<std::size_t> shape, T* value) :
+        Tensor(std::vector<std::size_t>(shape), value) {}
+
+    template <typename T>
+    Tensor<T>::Tensor(const std::vector<std::size_t>& shape, sycl::queue queue)
     {
-        m_rows = rows;
-        m_cols = cols;
-        m_gsize = rows * cols;
+        if(shape.size() == 0){
+            throw std::invalid_argument("Tensor shape cannot be empty");
+        }
+
+        m_shape = shape;
+        m_gsize = 1;
+        for(std::size_t dimension : m_shape){
+            m_gsize *= dimension;
+        }
+
+        m_cols = m_shape.back();
+        m_rows = m_cols == 0 ? 0 : m_gsize / m_cols;
         m_data = nullptr;
         m_context = queue.get_context();
         m_device = queue.get_device();
@@ -85,11 +65,58 @@ namespace flib{
         }
     }
     template <typename T>
+    Tensor<T>::Tensor(const std::vector<std::size_t>& shape)
+    {
+        if(shape.size() == 0){
+            throw std::invalid_argument("Tensor shape cannot be empty");
+        }
+
+        m_shape = shape;
+        m_gsize = 1;
+        for(std::size_t dimension : m_shape){
+            m_gsize *= dimension;
+        }
+
+        m_cols = m_shape.back();
+        m_rows = m_cols == 0 ? 0 : m_gsize / m_cols;
+        m_device_data = nullptr;
+        m_context = std::nullopt;
+        m_device = std::nullopt;
+        m_data = std::make_unique<T[]>(m_gsize);
+        for (std::size_t i = 0; i < m_gsize; ++i) {
+            m_data[i] = T(0); // Initialize with default value
+        }
+    }
+    template <typename T>
+    Tensor<T>::Tensor(const std::vector<std::size_t>& shape, T* value)
+    {
+        if(shape.size() == 0){
+            throw std::invalid_argument("Tensor shape cannot be empty");
+        }
+
+        m_shape = shape;
+        m_gsize = 1;
+        for(std::size_t dimension : m_shape){
+            m_gsize *= dimension;
+        }
+
+        m_cols = m_shape.back();
+        m_rows = m_cols == 0 ? 0 : m_gsize / m_cols;
+        m_device_data = nullptr;
+        m_context = std::nullopt;
+        m_device = std::nullopt;
+        m_data = std::make_unique<T[]>(m_gsize);
+        for(std::size_t i = 0; i < m_gsize; i++){
+            m_data[i] = value[i];
+        }
+    }
+    template <typename T>
     Tensor<T>::Tensor(const Tensor<T> &other)
     {
         m_rows = other.m_rows;
         m_cols = other.m_cols;
         m_gsize = other.m_gsize;
+        m_shape = other.m_shape;
         m_device_data = nullptr;
         m_context = other.m_context;
         m_device = other.m_device;
@@ -115,6 +142,7 @@ namespace flib{
         m_rows = other.m_rows;
         m_cols = other.m_cols;
         m_gsize = other.m_gsize;
+        m_shape = std::move(other.m_shape);
         m_data = std::move(other.m_data);
         m_device_data = other.m_device_data;
         m_context = std::move(other.m_context);
@@ -123,6 +151,7 @@ namespace flib{
         other.m_rows = 0;
         other.m_cols = 0;
         other.m_gsize = 0;
+        other.m_shape.clear();
         other.m_device_data = nullptr;
         other.m_context = std::nullopt;
         other.m_device = std::nullopt;
@@ -196,6 +225,7 @@ namespace flib{
             m_rows = other.m_rows;
             m_cols = other.m_cols;
             m_gsize = other.m_gsize;
+            m_shape = other.m_shape;
             m_context = other.m_context;
             m_device = other.m_device;
 
@@ -226,6 +256,7 @@ namespace flib{
             m_rows = other.m_rows;
             m_cols = other.m_cols;
             m_gsize = other.m_gsize;
+            m_shape = std::move(other.m_shape);
             m_data = std::move(other.m_data);
             m_device_data = other.m_device_data;
             m_context = std::move(other.m_context);
@@ -234,6 +265,7 @@ namespace flib{
             other.m_rows = 0;
             other.m_cols = 0;
             other.m_gsize = 0;
+            other.m_shape.clear();
             other.m_device_data = nullptr;
             other.m_context = std::nullopt;
             other.m_device = std::nullopt;

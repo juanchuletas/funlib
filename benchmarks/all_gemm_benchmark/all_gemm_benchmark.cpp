@@ -158,11 +158,11 @@ namespace
             K,
             N,
             [&](){
-                auto C = flib::tensor_operations::prod(deviceA, deviceB, Q);
+                auto C = flib::tensor_operations::gemm_naive(deviceA, deviceB, Q);
                 (void)C;
             },
             [&](sycl::event& event){
-                auto C = flib::tensor_operations::prod(deviceA, deviceB, Q, &event);
+                auto C = flib::tensor_operations::gemm_naive(deviceA, deviceB, Q, &event);
                 (void)C;
             });
 
@@ -205,7 +205,7 @@ namespace
                 (void)C;
             });
 
-        printMeasurements(M, K, N, "gemm through prod", original, original.kernel_time);
+        printMeasurements(M, K, N, "gemm_naive", original, original.kernel_time);
         printMeasurements(M, K, N, "gemmTiled", tiled, original.kernel_time);
         printMeasurements(M, K, N, "gemm_blocked2x2", blocked, original.kernel_time);
         printMeasurements(

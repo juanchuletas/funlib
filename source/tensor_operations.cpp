@@ -4,10 +4,29 @@
 
 namespace flib
 {
-    template <typename T>
-    Tensor<T> tensor_operations::gemm(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q,
-                                      sycl::event* kernel_event)
+    namespace
     {
+        template <typename T>
+        std::vector<std::size_t> gemm_output_shape(const Tensor<T>& A, const Tensor<T>& B)
+        {
+            if(A.getRank() < 2){
+                throw std::invalid_argument("The first GEMM tensor must have at least two dimensions");
+            }
+            if(B.getRank() != 2){
+                throw std::invalid_argument("The second GEMM tensor must have two dimensions");
+            }
+
+            std::vector<std::size_t> shape = A.getShape();
+            shape.back() = B.getCols();
+            return shape;
+        }
+    }
+
+    template <typename T>
+    Tensor<T> tensor_operations::gemm_naive(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q,
+                                            sycl::event* kernel_event)
+    {
+        std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
         // Assuming A is m x n
         size_t colsA = static_cast<size_t>(A.getCols());
         size_t rowsA = static_cast<size_t>(A.getRows());
@@ -36,7 +55,7 @@ namespace flib
 
             const T* dataA = A.device_data();
             const T* dataB = B.device_data();
-            Tensor<T> C(rowsC, colsC, Q);
+            Tensor<T> C(output_shape, Q);
             T* dataC = C.device_data();
 
             sycl::event event = Q.submit([&](sycl::handler &cgh){
@@ -61,7 +80,7 @@ namespace flib
             return C;
         }
 
-        Tensor<T> C(rowsC, colsC); //output matrix
+        Tensor<T> C(output_shape); //output tensor
         { //Sycl scope
             sycl::buffer<T, 1> buffc  = C.to_sycl_buffer();
             sycl::buffer<T, 1> buffa  = A.to_sycl_buffer();
@@ -95,6 +114,7 @@ namespace flib
     Tensor<T> tensor_operations::gemmTiled(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q,
                                            sycl::event* kernel_event)
     {
+        std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
         // Assuming A is m x n
         size_t colsA = static_cast<size_t>(A.getCols());
         size_t rowsA = static_cast<size_t>(A.getRows());
@@ -124,7 +144,7 @@ namespace flib
             }
             const T* dataA = A.device_data();
             const T* dataB = B.device_data();
-            Tensor<T> C(rowsC, colsC, Q); //device output matrix
+            Tensor<T> C(output_shape, Q); //device output tensor
             T* dataC = C.device_data();
             //
             sycl::range<2> global_range{global_rows, global_cols};
@@ -169,7 +189,7 @@ namespace flib
             event.wait();
             return C;
         }
-        Tensor<T> C(rowsC, colsC); //output matrix
+        Tensor<T> C(output_shape); //output tensor
         { //Sycl scope
             sycl::buffer<T, 1> buffc = C.to_sycl_buffer();
             sycl::buffer<T, 1> buffa = A.to_sycl_buffer();
@@ -225,6 +245,7 @@ namespace flib
     Tensor<T> tensor_operations::gemm_blocked2x2(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q,
                                                  sycl::event *kernel_event)
     {
+        std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
         /*
             This GEMM uses register blocking to compute 2x2 blocks of the output matrix at a time.
              It is designed for small matrices that fit in the cache. The kernel computes a 2x2 block of the output matrix C at a time, using registers to hold the intermediate sums.
@@ -266,7 +287,7 @@ namespace flib
         sycl::range<2> global_size{global_rows, global_cols};
         sycl::range<2> local_size{work_group_size, work_group_size};
 
-        Tensor<T> C(rowsC, colsC, Q); //device output matrix
+        Tensor<T> C(output_shape, Q); //device output tensor
         T* dataC = C.device_data();
 
         sycl::event event = Q.submit([&](sycl::handler &cgh){
@@ -321,6 +342,7 @@ namespace flib
     template <typename T>
     Tensor<T> tensor_operations::gemm_tiled_blocked2x2(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q, sycl::event *kernel_event)
     {
+        std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
         // Assuming A is m x n
         size_t colsA = static_cast<size_t>(A.getCols());
         size_t rowsA = static_cast<size_t>(A.getRows());
@@ -356,7 +378,7 @@ namespace flib
 
         const T* dataA = A.device_data();
         const T* dataB = B.device_data();
-        Tensor<T> C(rowsC, colsC, Q); //device output matrix
+        Tensor<T> C(output_shape, Q); //device output tensor
         T* dataC = C.device_data();
         sycl::range<2> global_range{global_rows, global_cols};
         sycl::range<2> local_range{tile_size, tile_size};
@@ -438,66 +460,126 @@ namespace flib
         event.wait();
         return C;
     }
+
     template <typename T>
-    Tensor<T> tensor_operations::matXvec(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q,
+    Tensor<T> tensor_operations::matxvec(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q,
                                          sycl::event *kernel_event)
     {
-            // Assuming A is m x n
-            size_t colsA = static_cast<size_t>(A.getCols());
-            size_t rowsA = static_cast<size_t>(A.getRows());
-            size_t colsB = static_cast<size_t>(B.getCols());
-            size_t rowsB = static_cast<size_t>(B.getRows());
-            if (colsA != rowsB)
-            {
-                //for matrix multiplication, the number of columns in A must be equal to the number of rows in B
-                //because tjhe result matrix will have the same number of rows as A and the same number of columns as B
-                throw std::invalid_argument("Tensor dimensions do not match for multiplication");
+        std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
+        size_t colsA = static_cast<size_t>(A.getCols());
+        size_t rowsA = static_cast<size_t>(A.getRows());
+        size_t colsB = static_cast<size_t>(B.getCols());
+        size_t rowsB = static_cast<size_t>(B.getRows());
+        if(colsA != rowsB)
+        {
+            throw std::invalid_argument("Tensor dimensions do not match for multiplication");
+        }
+        if(colsB != 1)
+        {
+            throw std::invalid_argument("The second tensor must be a vector");
+        }
+
+        if(A.is_device() || B.is_device())
+        {
+            if(!A.is_device() || !B.is_device()){
+                throw std::invalid_argument("Matrix vector inputs must use the same memory location");
             }
-    
-            Tensor<T> C(rowsA, 1); //output matrix
-            { //Sycl scope
-                sycl::buffer<T, 1> buffc  = C.to_sycl_buffer();
-                sycl::buffer<T, 1> buffa  = A.to_sycl_buffer();
-                sycl::buffer<T, 1> buffb  = B.to_sycl_buffer();
-                sycl::event event = Q.submit([&](sycl::handler &cgh){
-                    
-                    auto acc_matC = buffc.template get_access<sycl::access::mode::write>(cgh);
-                    auto acc_matA = buffa.template get_access<sycl::access::mode::read>(cgh);
-                    auto acc_matB = buffb.template get_access<sycl::access::mode::read>(cgh);
-                    cgh.parallel_for(sycl::range<2>(sycl::range<2> {static_cast<size_t>(rowsA),static_cast<size_t>(1)}),[=](sycl::item<2> item){
-                        const int i = item.get_id(0); // is like: for (int i = 0; i < rowsA; i++)
-                        T sum = 0.0; 
-                        for (int k = 0; k < colsA; k++)
-                        {   
-                            sum += acc_matA[i*colsA + k]* acc_matB[k];
+            if(!A.is_accessible_from(Q) || !B.is_accessible_from(Q))
+            {
+                throw std::invalid_argument("Matrix vector queue cannot access the input tensors");
+            }
+
+            const T* dataA = A.device_data();
+            const T* dataB = B.device_data();
+            Tensor<T> C(output_shape, Q);
+            T* dataC = C.device_data();
+
+            sycl::event event = Q.submit([&](sycl::handler &cgh){
+                cgh.parallel_for(
+                    sycl::range<1>{rowsA},
+                    [=](sycl::item<1> item){
+                        size_t i = item.get_id(0);
+                        T sum = T(0);
+                        for(size_t k = 0; k < colsA; k++)
+                        {
+                            sum += dataA[i * colsA + k] * dataB[k];
+                        }
+                        dataC[i] = sum;
+                    });
+            });
+
+            if(kernel_event != nullptr){
+                *kernel_event = event;
+            }
+            event.wait();
+            return C;
+        }
+
+        Tensor<T> C(output_shape);
+        {
+            sycl::buffer<T, 1> buffc = C.to_sycl_buffer();
+            sycl::buffer<T, 1> buffa = A.to_sycl_buffer();
+            sycl::buffer<T, 1> buffb = B.to_sycl_buffer();
+            sycl::event event = Q.submit([&](sycl::handler &cgh){
+                auto acc_matC = buffc.template get_access<sycl::access::mode::write>(cgh);
+                auto acc_matA = buffa.template get_access<sycl::access::mode::read>(cgh);
+                auto acc_matB = buffb.template get_access<sycl::access::mode::read>(cgh);
+                cgh.parallel_for(
+                    sycl::range<1>{rowsA},
+                    [=](sycl::item<1> item){
+                        size_t i = item.get_id(0);
+                        T sum = T(0);
+                        for(size_t k = 0; k < colsA; k++)
+                        {
+                            sum += acc_matA[i * colsA + k] * acc_matB[k];
                         }
                         acc_matC[i] = sum;
                     });
-                });
-                if(kernel_event != nullptr){
-                    *kernel_event = event;
-                }
+            });
+            if(kernel_event != nullptr){
+                *kernel_event = event;
             }
-            
-            return  C;
+        }
+
+        return C;
     }
 
-    //class sycl_handler;
-    // Implementations of the member functions can be done in a separate .cpp file or inline as shown above.
-    // The print function can be implemented to display the vector elements.
     template<typename T>
-    Tensor<T> tensor_operations::prod(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
+    Tensor<T> tensor_operations::gemm(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
                                       sycl::event* kernel_event)
-    {   
-    
-        if(A.getCols() == 1 || B.getCols() == 1){
-            //If one is a vector and the other is a matrix, do a matrix-vector multiplication
-            return matXvec(A, B, Q, kernel_event);
+    {
+        if(A.is_device() != B.is_device()){
+            throw std::invalid_argument("GEMM inputs must use the same memory location");
         }
-        else{
-            //Otherwise, do a matrix-matrix multiplication
-            return gemm(A, B, Q, kernel_event);
+
+        if(A.is_host()){
+            return gemm_naive(A, B, Q, kernel_event);
         }
+
+        if(B.getCols() == 1){
+            return matxvec(A, B, Q, kernel_event);
+        }
+
+        sycl::device selected_device = Q.get_device();
+        if(!selected_device.is_gpu()){
+            return gemm_naive(A, B, Q, kernel_event);
+        }
+
+        sycl::backend selected_backend = Q.get_backend();
+        if(selected_backend == sycl::backend::ext_oneapi_cuda){
+            return gemm_blocked2x2(A, B, Q, kernel_event);
+        }
+        if(selected_backend == sycl::backend::ext_oneapi_level_zero){
+            if(A.getCols() <= 64){
+                return gemmTiled(A, B, Q, kernel_event);
+            }
+            return gemm_tiled_blocked2x2(A, B, Q, kernel_event);
+        }
+        if(selected_backend == sycl::backend::opencl){
+            return gemm_tiled_blocked2x2(A, B, Q, kernel_event);
+        }
+
+        return gemmTiled(A, B, Q, kernel_event);
     }
 
 
@@ -611,10 +693,15 @@ namespace flib
 
     }
     // Explicit instantiations (VERY IMPORTANT)
-    template Tensor<double>    tensor_operations::prod(const Tensor<double>&, const Tensor<double>&, sycl::queue, sycl::event*);
-    template Tensor<float>     tensor_operations::prod(const Tensor<float>&, const Tensor<float>&, sycl::queue, sycl::event*);
-    template Tensor<int>       tensor_operations::prod(const Tensor<int>&, const Tensor<int>&, sycl::queue, sycl::event*);
-
+    template Tensor<double>    tensor_operations::gemm(const Tensor<double>&, const Tensor<double>&, sycl::queue, sycl::event*);
+    template Tensor<float>     tensor_operations::gemm(const Tensor<float>&, const Tensor<float>&, sycl::queue, sycl::event*);
+    template Tensor<int>       tensor_operations::gemm(const Tensor<int>&, const Tensor<int>&, sycl::queue, sycl::event*);
+    template Tensor<double>    tensor_operations::gemm_naive(const Tensor<double>&, const Tensor<double>&, sycl::queue, sycl::event*);
+    template Tensor<float>     tensor_operations::gemm_naive(const Tensor<float>&, const Tensor<float>&, sycl::queue, sycl::event*);
+    template Tensor<int>       tensor_operations::gemm_naive(const Tensor<int>&, const Tensor<int>&, sycl::queue, sycl::event*);
+    template Tensor<double>    tensor_operations::matxvec(const Tensor<double>&, const Tensor<double>&, sycl::queue, sycl::event*);
+    template Tensor<float>     tensor_operations::matxvec(const Tensor<float>&, const Tensor<float>&, sycl::queue, sycl::event*);
+    template Tensor<int>       tensor_operations::matxvec(const Tensor<int>&, const Tensor<int>&, sycl::queue, sycl::event*);
     template double         tensor_operations::dot(const Tensor<double>&, const Tensor<double>&, sycl::queue);
     template float          tensor_operations::dot(const Tensor<float>&, const Tensor<float>&, sycl::queue);
     template int            tensor_operations::dot(const Tensor<int>&, const Tensor<int>&, sycl::queue);

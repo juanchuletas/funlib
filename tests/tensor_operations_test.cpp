@@ -142,18 +142,25 @@ namespace
         bool passed = true;
 
         passed = checkMethod<T>(
-            "gemm through prod",
+            "gemm_naive",
             expected,
             rowsA,
             colsA,
             colsB,
             Q,
             [&](){
-                if(colsB == 1)
-                {
-                    return flib::tensor_operations::prod(A, B, Q);
-                }
-                return flib::tensor_operations::prod(deviceA, deviceB, Q);
+                return flib::tensor_operations::gemm_naive(deviceA, deviceB, Q);
+            }) && passed;
+
+        passed = checkMethod<T>(
+            "gemm dispatcher",
+            expected,
+            rowsA,
+            colsA,
+            colsB,
+            Q,
+            [&](){
+                return flib::tensor_operations::gemm(deviceA, deviceB, Q);
             }) && passed;
 
         passed = checkMethod<T>(
@@ -231,9 +238,15 @@ namespace
         bool passed = true;
 
         passed = checkInvalidMethod(
-            "gemm through prod",
+            "gemm_naive",
             [&](){
-                flib::tensor_operations::prod(A, B, Q);
+                flib::tensor_operations::gemm_naive(deviceA, deviceB, Q);
+            }) && passed;
+
+        passed = checkInvalidMethod(
+            "gemm dispatcher",
+            [&](){
+                flib::tensor_operations::gemm(deviceA, deviceB, Q);
             }) && passed;
 
         passed = checkInvalidMethod(
@@ -256,6 +269,33 @@ namespace
 
         return passed;
     }
+
+    bool checkNDimensionalShape(sycl::queue Q)
+    {
+        flib::Tensor<float> hostA({2, 3, 5});
+        flib::Tensor<float> hostB({5, 7});
+        fillTensor(hostA, 3);
+        fillTensor(hostB, 7);
+
+        std::vector<float> dataA = hostA.to_host(Q);
+        std::vector<float> dataB = hostB.to_host(Q);
+        flib::Tensor<float> deviceA({2, 3, 5}, Q);
+        flib::Tensor<float> deviceB({5, 7}, Q);
+        deviceA.copy_from(dataA.data(), Q).wait();
+        deviceB.copy_from(dataB.data(), Q).wait();
+
+        flib::Tensor<float> result = flib::tensor_operations::gemm(deviceA, deviceB, Q);
+        const std::vector<std::size_t> expected_shape{2, 3, 7};
+        if(result.getShape() != expected_shape)
+        {
+            std::cerr<<"GEMM did not preserve the leading tensor dimensions"<<std::endl;
+            return false;
+        }
+
+        std::cout<<"Passed GEMM shape preservation for [2, 3, 5] * [5, 7]"<<std::endl;
+        return true;
+    }
+
 }
 
 int main()
@@ -266,6 +306,7 @@ int main()
     passed = checkShape<float>(1, 1, 1, Q) && passed;
     passed = checkShape<float>(2, 2, 2, Q) && passed;
     passed = checkShape<float>(3, 5, 7, Q) && passed;
+    passed = checkShape<float>(5, 3, 1, Q) && passed;
     passed = checkShape<float>(15, 17, 13, Q) && passed;
     passed = checkShape<float>(16, 16, 16, Q) && passed;
     passed = checkShape<float>(17, 16, 31, Q) && passed;
@@ -274,6 +315,7 @@ int main()
     passed = checkShape<double>(17, 31, 9, Q) && passed;
     passed = checkShape<int>(17, 31, 9, Q) && passed;
     passed = checkInvalidShapes(Q) && passed;
+    passed = checkNDimensionalShape(Q) && passed;
 
     if(!passed)
     {

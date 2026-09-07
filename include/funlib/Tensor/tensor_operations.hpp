@@ -12,16 +12,16 @@ namespace flib{
         //It is used to perform operations on the Tensor class
         //It is a friend class of the sycl_handler class
         //It is used to perform operations on the Tensor class
-        template<typename T>
-        static Tensor<T> gemm(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
-                              sycl::event* kernel_event);
-        template<typename T>
-        static Tensor<T> matXvec(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
-                                 sycl::event* kernel_event);
         public:
             template<typename T>
-            static Tensor<T> prod(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
+            static Tensor<T> gemm(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
                                   sycl::event* kernel_event = nullptr);
+            template<typename T>
+            static Tensor<T> gemm_naive(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
+                                        sycl::event* kernel_event = nullptr);
+            template<typename T>
+            static Tensor<T> matxvec(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
+                                     sycl::event* kernel_event = nullptr);
             template<typename T>
             static Tensor<T> gemmTiled(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
                                        sycl::event* kernel_event = nullptr);
