@@ -312,6 +312,34 @@ namespace flib{
     }
 
     template <typename T>
+    Tensor<T>& Tensor<T>::reshape(std::initializer_list<std::size_t> shape)
+    {
+        return reshape(std::vector<std::size_t>(shape));
+    }
+
+    template <typename T>
+    Tensor<T>& Tensor<T>::reshape(const std::vector<std::size_t>& shape)
+    {
+        if(shape.size() == 0){
+            throw std::invalid_argument("Tensor shape cannot be empty");
+        }
+
+        std::size_t new_size = 1;
+        for(std::size_t dimension : shape){
+            new_size *= dimension;
+        }
+
+        if(new_size != m_gsize){
+            throw std::invalid_argument("The new tensor shape must contain the same number of elements");
+        }
+
+        m_shape = shape;
+        m_cols = m_shape.back();
+        m_rows = m_cols == 0 ? 0 : m_gsize / m_cols;
+        return *this;
+    }
+
+    template <typename T>
     void Tensor<T>::print() const
     {
         if(is_device()){

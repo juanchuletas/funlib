@@ -56,6 +56,8 @@ namespace flib{
         sycl::buffer<T, 1> to_sycl_buffer() const;
         sycl::event copy_from(const T* host_data, sycl::queue queue);
         std::vector<T> to_host(sycl::queue queue) const;
+        Tensor<T>& reshape(std::initializer_list<std::size_t> shape);
+        Tensor<T>& reshape(const std::vector<std::size_t>& shape);
 
         T* device_data() { return m_device_data; }
         const T* device_data() const { return m_device_data; }
