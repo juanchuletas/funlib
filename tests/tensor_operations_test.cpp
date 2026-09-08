@@ -296,6 +296,44 @@ namespace
         return true;
     }
 
+    bool checkReshape(sycl::queue Q)
+    {
+        flib::Tensor<float> hostTensor({2, 3, 4});
+        for(std::size_t i = 0; i < 24; i++){
+            hostTensor[i] = static_cast<float>(i);
+        }
+
+        hostTensor.reshape({2, 2, 2, 3});
+        const std::vector<std::size_t> expected_shape{2, 2, 2, 3};
+        if(hostTensor.getShape() != expected_shape || hostTensor[17] != 17.0f)
+        {
+            std::cerr<<"Host tensor reshape changed its data or produced the wrong shape"<<std::endl;
+            return false;
+        }
+
+        flib::Tensor<float> deviceTensor({2, 3, 4}, Q);
+        float* original_pointer = deviceTensor.device_data();
+        deviceTensor.reshape({6, 4});
+        if(deviceTensor.device_data() != original_pointer || deviceTensor.getShape() != std::vector<std::size_t>{6, 4})
+        {
+            std::cerr<<"Device tensor reshape allocated memory or produced the wrong shape"<<std::endl;
+            return false;
+        }
+
+        try
+        {
+            hostTensor.reshape({2, 2});
+        }
+        catch(const std::invalid_argument&)
+        {
+            std::cout<<"Passed tensor reshape tests"<<std::endl;
+            return true;
+        }
+
+        std::cerr<<"Tensor reshape accepted a different number of elements"<<std::endl;
+        return false;
+    }
+
 }
 
 int main()
@@ -316,6 +354,7 @@ int main()
     passed = checkShape<int>(17, 31, 9, Q) && passed;
     passed = checkInvalidShapes(Q) && passed;
     passed = checkNDimensionalShape(Q) && passed;
+    passed = checkReshape(Q) && passed;
 
     if(!passed)
     {
