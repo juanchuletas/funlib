@@ -334,6 +334,128 @@ namespace
         return false;
     }
 
+    bool checkPermute(sycl::queue Q)
+    {
+        flib::Tensor<float> hostInput({2, 3, 4});
+        for(std::size_t i = 0; i < hostInput.getSize(); i++){
+            hostInput[i] = static_cast<float>(i);
+        }
+
+        flib::Tensor<float> hostOutput =
+            flib::tensor_operations::permute(hostInput, {0, 2, 1}, Q);
+        const std::vector<std::size_t> expected_shape{2, 4, 3};
+        if(hostOutput.getShape() != expected_shape){
+            std::cerr<<"Host permute produced the wrong shape"<<std::endl;
+            return false;
+        }
+
+        for(std::size_t batch = 0; batch < 2; batch++){
+            for(std::size_t feature = 0; feature < 4; feature++){
+                for(std::size_t token = 0; token < 3; token++){
+                    std::size_t input_index = (batch * 3 + token) * 4 + feature;
+                    std::size_t output_index = (batch * 4 + feature) * 3 + token;
+                    if(hostOutput[output_index] != hostInput[input_index]){
+                        std::cerr<<"Host permute produced incorrect data"<<std::endl;
+                        return false;
+                    }
+                }
+            }
+        }
+
+        std::vector<float> input_data = hostInput.to_host(Q);
+        flib::Tensor<float> deviceInput({2, 3, 4}, Q);
+        deviceInput.copy_from(input_data.data(), Q).wait();
+        flib::Tensor<float> deviceOutput =
+            flib::tensor_operations::permute(deviceInput, {0, 2, 1}, Q);
+        std::vector<float> output_data = deviceOutput.to_host(Q);
+        if(deviceOutput.getShape() != expected_shape){
+            std::cerr<<"Device permute produced the wrong shape"<<std::endl;
+            return false;
+        }
+
+        for(std::size_t i = 0; i < output_data.size(); i++){
+            if(output_data[i] != hostOutput[i]){
+                std::cerr<<"Device permute does not match host permute"<<std::endl;
+                return false;
+            }
+        }
+
+        try
+        {
+            flib::tensor_operations::permute(hostInput, {0, 0, 1}, Q);
+        }
+        catch(const std::invalid_argument&)
+        {
+            std::cout<<"Passed tensor permute tests"<<std::endl;
+            return true;
+        }
+
+        std::cerr<<"Permute accepted a repeated dimension"<<std::endl;
+        return false;
+    }
+
+    bool checkBatchedGemm(sycl::queue Q)
+    {
+        flib::Tensor<float> hostA({2, 3, 2, 4});
+        flib::Tensor<float> hostB({2, 3, 5, 4});
+        for(std::size_t i = 0; i < hostA.getSize(); i++){
+            hostA[i] = static_cast<float>(static_cast<int>(i % 7) - 3);
+        }
+        for(std::size_t i = 0; i < hostB.getSize(); i++){
+            hostB[i] = static_cast<float>(static_cast<int>(i % 5) - 2);
+        }
+
+        std::vector<float> expected(2 * 3 * 2 * 5, 0.0f);
+        for(std::size_t batch = 0; batch < 6; batch++){
+            for(std::size_t row = 0; row < 2; row++){
+                for(std::size_t col = 0; col < 5; col++){
+                    for(std::size_t k = 0; k < 4; k++){
+                        expected[batch * 10 + row * 5 + col] +=
+                            hostA[batch * 8 + row * 4 + k] *
+                            hostB[batch * 20 + col * 4 + k];
+                    }
+                }
+            }
+        }
+
+        flib::Tensor<float> hostC =
+            flib::tensor_operations::gemm_batched(hostA, hostB, Q, false, true);
+        const std::vector<std::size_t> expected_shape{2, 3, 2, 5};
+        if(hostC.getShape() != expected_shape){
+            std::cerr<<"Host batched GEMM produced the wrong shape"<<std::endl;
+            return false;
+        }
+        for(std::size_t i = 0; i < expected.size(); i++){
+            if(hostC[i] != expected[i]){
+                std::cerr<<"Host batched GEMM produced incorrect data"<<std::endl;
+                return false;
+            }
+        }
+
+        std::vector<float> dataA = hostA.to_host(Q);
+        std::vector<float> dataB = hostB.to_host(Q);
+        flib::Tensor<float> deviceA({2, 3, 2, 4}, Q);
+        flib::Tensor<float> deviceB({2, 3, 5, 4}, Q);
+        deviceA.copy_from(dataA.data(), Q).wait();
+        deviceB.copy_from(dataB.data(), Q).wait();
+        flib::Tensor<float> deviceC =
+            flib::tensor_operations::gemm_batched(deviceA, deviceB, Q, false, true);
+        std::vector<float> actual = deviceC.to_host(Q);
+        if(deviceC.getShape() != expected_shape){
+            std::cerr<<"Device batched GEMM produced the wrong shape"<<std::endl;
+            return false;
+        }
+        for(std::size_t i = 0; i < expected.size(); i++){
+            if(actual[i] != expected[i]){
+                std::cerr<<"Device batched GEMM produced incorrect data"<<std::endl;
+                return false;
+            }
+        }
+
+        std::cout<<"Passed batched GEMM for [2, 3, 2, 4] * [2, 3, 5, 4] transpose"<<std::endl;
+        return true;
+    }
+
 }
 
 int main()
@@ -355,6 +477,8 @@ int main()
     passed = checkInvalidShapes(Q) && passed;
     passed = checkNDimensionalShape(Q) && passed;
     passed = checkReshape(Q) && passed;
+    passed = checkPermute(Q) && passed;
+    passed = checkBatchedGemm(Q) && passed;
 
     if(!passed)
     {

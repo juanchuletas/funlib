@@ -31,6 +31,13 @@ namespace flib{
             template<typename T>
             static Tensor<T> gemm_tiled_blocked2x2(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
                                                    sycl::event* kernel_event = nullptr);
+            template<typename T>
+            static Tensor<T> gemm_batched(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,
+                                          bool transpose_A = false, bool transpose_B = false,
+                                          sycl::event* kernel_event = nullptr);
+            template<typename T>
+            static Tensor<T> permute(const Tensor<T>& input, const std::vector<std::size_t>& order,
+                                     sycl::queue Q, sycl::event* kernel_event = nullptr);
         
             //dot product of two vectors or two one dimensional sets
             template<typename T>

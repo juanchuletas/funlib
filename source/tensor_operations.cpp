@@ -1,6 +1,7 @@
 
 #include <funlib/Tensor/tensor_operations.hpp>
 #include <funlib/sycl/sycl_handler.hpp>
+#include <array>
 
 namespace flib
 {
@@ -582,6 +583,91 @@ namespace flib
         return gemmTiled(A, B, Q, kernel_event);
     }
 
+    template<typename T>
+    Tensor<T> tensor_operations::permute(const Tensor<T>& input, const std::vector<std::size_t>& order,
+                                         sycl::queue Q, sycl::event* kernel_event)
+    {
+        constexpr std::size_t maximum_rank = 16;
+        std::size_t rank = input.getRank();
+        if(rank == 0 || rank > maximum_rank){
+            throw std::invalid_argument("Permute supports tensors with 1 to 16 dimensions");
+        }
+        if(order.size() != rank){
+            throw std::invalid_argument("Permutation order must contain one entry for every dimension");
+        }
+
+        std::array<std::size_t, maximum_rank> used{};
+        std::array<std::size_t, maximum_rank> input_strides{};
+        std::array<std::size_t, maximum_rank> output_strides{};
+        std::array<std::size_t, maximum_rank> permutation{};
+        std::vector<std::size_t> output_shape(rank);
+        const std::vector<std::size_t>& input_shape = input.getShape();
+
+        for(std::size_t axis = 0; axis < rank; axis++){
+            if(order[axis] >= rank || used[order[axis]] != 0){
+                throw std::invalid_argument("Permutation order must contain every dimension exactly once");
+            }
+            used[order[axis]] = 1;
+            permutation[axis] = order[axis];
+            output_shape[axis] = input_shape[order[axis]];
+        }
+
+        input_strides[rank - 1] = 1;
+        output_strides[rank - 1] = 1;
+        for(std::size_t axis = rank - 1; axis > 0; axis--){
+            input_strides[axis - 1] = input_strides[axis] * input_shape[axis];
+            output_strides[axis - 1] = output_strides[axis] * output_shape[axis];
+        }
+
+        if(input.is_host()){
+            Tensor<T> output(output_shape);
+            for(std::size_t output_index = 0; output_index < input.getSize(); output_index++){
+                std::size_t remaining = output_index;
+                std::size_t input_index = 0;
+                for(std::size_t axis = 0; axis < rank; axis++){
+                    std::size_t coordinate = remaining / output_strides[axis];
+                    remaining %= output_strides[axis];
+                    input_index += coordinate * input_strides[permutation[axis]];
+                }
+                output[output_index] = input[input_index];
+            }
+            return output;
+        }
+
+        if(!input.is_accessible_from(Q)){
+            throw std::invalid_argument("Permute queue cannot access the input tensor");
+        }
+
+        Tensor<T> output(output_shape, Q);
+        const T* input_data = input.device_data();
+        T* output_data = output.device_data();
+        std::size_t total_size = input.getSize();
+
+        if(total_size == 0){
+            return output;
+        }
+
+        sycl::event event = Q.submit([&](sycl::handler& cgh){
+            cgh.parallel_for(sycl::range<1>{total_size}, [=](sycl::item<1> item){
+                std::size_t output_index = item.get_id(0);
+                std::size_t remaining = output_index;
+                std::size_t input_index = 0;
+                for(std::size_t axis = 0; axis < rank; axis++){
+                    std::size_t coordinate = remaining / output_strides[axis];
+                    remaining %= output_strides[axis];
+                    input_index += coordinate * input_strides[permutation[axis]];
+                }
+                output_data[output_index] = input_data[input_index];
+            });
+        });
+
+        if(kernel_event != nullptr){
+            *kernel_event = event;
+        }
+        event.wait();
+        return output;
+    }
+
 
     template<typename T>
     T tensor_operations::dot(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q){
@@ -715,6 +801,9 @@ namespace flib
     template Tensor<double>    tensor_operations::gemm_tiled_blocked2x2(const Tensor<double>&, const Tensor<double>&, sycl::queue, sycl::event*);
     template Tensor<float>     tensor_operations::gemm_tiled_blocked2x2(const Tensor<float>&, const Tensor<float>&, sycl::queue, sycl::event*);
     template Tensor<int>       tensor_operations::gemm_tiled_blocked2x2(const Tensor<int>&, const Tensor<int>&, sycl::queue, sycl::event*);
+    template Tensor<double>    tensor_operations::permute(const Tensor<double>&, const std::vector<std::size_t>&, sycl::queue, sycl::event*);
+    template Tensor<float>     tensor_operations::permute(const Tensor<float>&, const std::vector<std::size_t>&, sycl::queue, sycl::event*);
+    template Tensor<int>       tensor_operations::permute(const Tensor<int>&, const std::vector<std::size_t>&, sycl::queue, sycl::event*);
     template double         tensor_operations::reduction(const Tensor<double>&, sycl::queue);
     template float          tensor_operations::reduction(const Tensor<float>&, sycl::queue);
     template int            tensor_operations::reduction(const Tensor<int>&, sycl::queue);
