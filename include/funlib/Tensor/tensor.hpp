@@ -70,6 +70,7 @@ namespace flib{
         //getters
         std::size_t getRows() const { return m_rows; }
         std::size_t getCols() const { return m_cols; }
+        std::size_t getSize() const { return m_gsize; }
         std::size_t getRank() const { return m_shape.size(); }
         const std::vector<std::size_t>& getShape() const { return m_shape; }
 
