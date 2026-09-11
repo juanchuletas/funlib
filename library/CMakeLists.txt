@@ -21,6 +21,7 @@ set(SOURCE_FILES
     ${FUNLIB_SOURCE_DIR}/source/tensor.cpp
     ${FUNLIB_SOURCE_DIR}/source/tensor_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/batched_gemm.cpp
+    ${FUNLIB_SOURCE_DIR}/source/elementwise_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/linal.cpp
    
 )
