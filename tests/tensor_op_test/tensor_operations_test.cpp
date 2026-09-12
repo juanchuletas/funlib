@@ -8,8 +8,6 @@
 #include <string>
 #include <vector>
 
-namespace
-{
     template<typename T>
     flib::Tensor<T> gemmReference(const flib::Tensor<T>& A, const flib::Tensor<T>& B)
     {
@@ -455,8 +453,6 @@ namespace
         std::cout<<"Passed batched GEMM for [2, 3, 2, 4] * [2, 3, 5, 4] transpose"<<std::endl;
         return true;
     }
-
-}
 
 int main()
 {
