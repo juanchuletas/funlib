@@ -2,8 +2,6 @@
 
 namespace flib
 {
-    namespace
-    {
         struct BatchedGemmSizes
         {
             std::size_t batch_count;
@@ -166,7 +164,6 @@ namespace flib
             }
             return submit_buffer_kernel<T, false, false>(buffA, buffB, buffC, sizes, Q);
         }
-    }
 
     template<typename T>
     Tensor<T> tensor_operations::gemm_batched(const Tensor<T>& A, const Tensor<T>& B, sycl::queue Q,

@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-namespace
-{
     struct ReferenceResult
     {
         std::vector<std::size_t> shape;
@@ -144,7 +142,6 @@ namespace
         std::cerr<<"Batched GEMM accepted invalid dimensions"<<std::endl;
         return false;
     }
-}
 
 int main()
 {

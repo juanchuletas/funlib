@@ -4,8 +4,6 @@
 #include <iostream>
 #include <vector>
 
-namespace
-{
     bool checkValues(const flib::Tensor<float>& tensor,
                      const std::vector<float>& expected,
                      sycl::queue Q)
@@ -27,7 +25,6 @@ namespace
         }
         return true;
     }
-}
 
 int main()
 {
@@ -48,7 +45,7 @@ int main()
     }
 
     flib::Tensor<float> hostOutput =
-        flib::tensor_operations::scale(hostInput, 0.125f, Q);
+        flib::operations::scale(hostInput, 0.125f, Q);
     if(!checkValues(hostOutput, expected, Q)){
         return 1;
     }
@@ -58,7 +55,7 @@ int main()
     deviceInput.copy_from(input_data.data(), Q).wait();
     sycl::event kernel_event;
     flib::Tensor<float> deviceOutput =
-        flib::tensor_operations::scale(deviceInput, 0.125f, Q, &kernel_event);
+        flib::operations::scale(deviceInput, 0.125f, Q, &kernel_event);
     kernel_event.wait();
     if(!checkValues(deviceOutput, expected, Q)){
         return 1;

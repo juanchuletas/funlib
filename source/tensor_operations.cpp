@@ -5,22 +5,19 @@
 
 namespace flib
 {
-    namespace
+    template <typename T>
+    std::vector<std::size_t> gemm_output_shape(const Tensor<T>& A, const Tensor<T>& B)
     {
-        template <typename T>
-        std::vector<std::size_t> gemm_output_shape(const Tensor<T>& A, const Tensor<T>& B)
-        {
-            if(A.getRank() < 2){
-                throw std::invalid_argument("The first GEMM tensor must have at least two dimensions");
-            }
-            if(B.getRank() != 2){
-                throw std::invalid_argument("The second GEMM tensor must have two dimensions");
-            }
-
-            std::vector<std::size_t> shape = A.getShape();
-            shape.back() = B.getCols();
-            return shape;
+        if(A.getRank() < 2){
+            throw std::invalid_argument("The first GEMM tensor must have at least two dimensions");
         }
+        if(B.getRank() != 2){
+            throw std::invalid_argument("The second GEMM tensor must have two dimensions");
+        }
+
+        std::vector<std::size_t> shape = A.getShape();
+        shape.back() = B.getCols();
+        return shape;
     }
 
     template <typename T>

@@ -197,7 +197,7 @@ The current project requires:
 5. OpenGL development files.
 6. A working SYCL backend for the selected device.
 
-The current CMake files use a local path to an LLVM SYCL compiler. Change `CMAKE_CXX_COMPILER` in the CMake files if your compiler is installed in another location.
+The current CMake files use a local path to an LLVM SYCL compiler. Change `CMAKE_CXX_COMPILER` in the CMake files if the compiler is installed in another location.
 
 The library is currently compiled for the generic SPIR target and the NVIDIA CUDA target.
 
@@ -215,6 +215,59 @@ make install
 ```
 
 The default installation location is the `install` directory in the project root.
+
+Public headers live under `include/funlib` and use `<funlib/...>` includes both
+inside the library and in programs that use it. The umbrella header is
+`include/funlib/funlib.hpp`; it is available without installing the library.
+
+### Use funlib in another project
+
+After installation, another project can use funlib with this `CMakeLists.txt`:
+
+```cmake
+cmake_minimum_required(VERSION 3.15)
+project(my_app LANGUAGES CXX)
+
+find_package(funlib CONFIG REQUIRED
+    PATHS "/path/to/funlib/install"
+)
+
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE funlib::funlib)
+```
+
+Replace `/path/to/funlib/install` with the actual installation path. Here,
+`main.cpp` is the program source file. Another option is to set `CMAKE_PREFIX_PATH`
+to the installation path instead of adding `PATHS` to `find_package`.
+
+CMake reads the installed funlib configuration files to find the headers, the
+library, and its dependencies. The `funlib::funlib` target supplies the include
+directory, C++17 requirement, SYCL flags, and OpenCL and OpenGL link settings.
+The project must still use a compatible SYCL compiler and have the required
+dependencies installed.
+
+The project needs these installed files:
+
+```text
+install/
+├── include/funlib/
+└── lib/
+    ├── libfunlib.a
+    └── cmake/funlib/
+        ├── funlibConfig.cmake
+        ├── funlibConfigVersion.cmake
+        ├── funlibTargets.cmake
+        └── funlibTargets-*.cmake
+```
+
+It does not need funlib's `CMakeCache.txt` or build directory.
+The file `library/funlibConfig.cmake.in` is a template. CMake uses it to create
+`funlibConfig.cmake`, which is then installed with the library. Other projects
+use the installed file, so they do not need the template.
+
+The current tests do not use `find_package(funlib)`. Their CMake files set the
+library and header paths directly and list the required dependencies. The
+package configuration lets other projects get these settings automatically.
 
 ## Tests
 

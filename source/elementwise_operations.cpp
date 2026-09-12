@@ -1,9 +1,9 @@
-#include <funlib/Tensor/tensor_operations.hpp>
+#include <funlib/operations/elementwise_operations/elementwise_operations.hpp>
 
-namespace flib
+namespace flib::operations
 {
     template<typename T>
-    Tensor<T> tensor_operations::scale(const Tensor<T>& input, T value, sycl::queue Q,
+    Tensor<T> scale(const Tensor<T>& input, T value, sycl::queue Q,
                                        sycl::event* kernel_event)
     {
         const std::vector<std::size_t>& shape = input.getShape();
@@ -61,10 +61,10 @@ namespace flib
         return output;
     }
 
-    template Tensor<double> tensor_operations::scale(
+    template Tensor<double> scale(
         const Tensor<double>&, double, sycl::queue, sycl::event*);
-    template Tensor<float> tensor_operations::scale(
+    template Tensor<float> scale(
         const Tensor<float>&, float, sycl::queue, sycl::event*);
-    template Tensor<int> tensor_operations::scale(
+    template Tensor<int> scale(
         const Tensor<int>&, int, sycl::queue, sycl::event*);
 }
