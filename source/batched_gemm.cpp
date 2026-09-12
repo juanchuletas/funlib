@@ -1,6 +1,8 @@
 #include <funlib/Tensor/tensor_operations.hpp>
 
 namespace flib {
+constexpr std::size_t batched_gemm_tile_size = 16;
+
 struct BatchedGemmSizes {
   std::size_t batch_count;
   std::size_t stored_rowsA;
@@ -34,8 +36,8 @@ void set_strides(const BatchedGemmSizes &sizes, std::size_t &row_strideA,
 }
 
 template <typename T, bool transpose_A, bool transpose_B>
-sycl::event submit_device_kernel(const T *dataA, const T *dataB, T *dataC,
-                                 const BatchedGemmSizes &sizes, sycl::queue Q) {
+sycl::event submit_usm_kernel(const T *dataA, const T *dataB, T *dataC,
+                              const BatchedGemmSizes &sizes, sycl::queue Q) {
   std::size_t row_strideA;
   std::size_t inner_strideA;
   std::size_t inner_strideB;
@@ -63,6 +65,67 @@ sycl::event submit_device_kernel(const T *dataA, const T *dataB, T *dataC,
             sum += dataA[offsetA + indexA] * dataB[offsetB + indexB];
           }
           dataC[batch * matrix_sizeC + row * sizes.colsC + col] = sum;
+        });
+  });
+}
+
+template <typename T>
+sycl::event submit_usm_normal_transposed_tiled_kernel(
+    const T *dataA, const T *dataB, T *dataC,
+    const BatchedGemmSizes &sizes, sycl::queue Q) {
+  constexpr std::size_t tile_size = batched_gemm_tile_size;
+  std::size_t matrix_sizeA = sizes.stored_rowsA * sizes.stored_colsA;
+  std::size_t matrix_sizeB = sizes.stored_rowsB * sizes.stored_colsB;
+  std::size_t matrix_sizeC = sizes.rowsC * sizes.colsC;
+  std::size_t global_rows =
+      ((sizes.rowsC + tile_size - 1) / tile_size) * tile_size;
+  std::size_t global_cols =
+      ((sizes.colsC + tile_size - 1) / tile_size) * tile_size;
+
+  return Q.submit([&](sycl::handler &cgh) {
+    sycl::local_accessor<T, 1> tileA(tile_size * tile_size, cgh);
+    sycl::local_accessor<T, 1> tileB(tile_size * tile_size, cgh);
+
+    cgh.parallel_for(
+        sycl::nd_range<3>{{sizes.batch_count, global_rows, global_cols},
+                          {1, tile_size, tile_size}},
+        [=](sycl::nd_item<3> item) {
+          std::size_t batch = item.get_global_id(0);
+          std::size_t row = item.get_global_id(1);
+          std::size_t col = item.get_global_id(2);
+          std::size_t local_row = item.get_local_id(1);
+          std::size_t local_col = item.get_local_id(2);
+          std::size_t offsetA = batch * matrix_sizeA;
+          std::size_t offsetB = batch * matrix_sizeB;
+          T sum = T(0);
+
+          for (std::size_t tile = 0; tile < sizes.inner_size;
+               tile += tile_size) {
+            std::size_t k = tile + local_col;
+            std::size_t key_row = item.get_group(2) * tile_size + local_row;
+
+            tileA[local_row * tile_size + local_col] =
+                row < sizes.rowsC && k < sizes.inner_size
+                    ? dataA[offsetA + row * sizes.stored_colsA + k]
+                    : T(0);
+            tileB[local_row * tile_size + local_col] =
+                key_row < sizes.colsC && k < sizes.inner_size
+                    ? dataB[offsetB + key_row * sizes.stored_colsB + k]
+                    : T(0);
+
+            item.barrier(sycl::access::fence_space::local_space);
+
+            for (std::size_t k = 0; k < tile_size; k++) {
+              sum += tileA[local_row * tile_size + k] *
+                     tileB[local_col * tile_size + k];
+            }
+
+            item.barrier(sycl::access::fence_space::local_space);
+          }
+
+          if (row < sizes.rowsC && col < sizes.colsC) {
+            dataC[batch * matrix_sizeC + row * sizes.colsC + col] = sum;
+          }
         });
   });
 }
@@ -107,23 +170,87 @@ sycl::event submit_buffer_kernel(sycl::buffer<T, 1> &buffA,
 }
 
 template <typename T>
-sycl::event submit_device(const Tensor<T> &A, const Tensor<T> &B, Tensor<T> &C,
-                          const BatchedGemmSizes &sizes, bool transpose_A,
-                          bool transpose_B, sycl::queue Q) {
+sycl::event submit_buffer_normal_transposed_tiled_kernel(
+    sycl::buffer<T, 1> &buffA, sycl::buffer<T, 1> &buffB,
+    sycl::buffer<T, 1> &buffC, const BatchedGemmSizes &sizes, sycl::queue Q) {
+  constexpr std::size_t tile_size = batched_gemm_tile_size;
+  std::size_t matrix_sizeA = sizes.stored_rowsA * sizes.stored_colsA;
+  std::size_t matrix_sizeB = sizes.stored_rowsB * sizes.stored_colsB;
+  std::size_t matrix_sizeC = sizes.rowsC * sizes.colsC;
+  std::size_t global_rows =
+      ((sizes.rowsC + tile_size - 1) / tile_size) * tile_size;
+  std::size_t global_cols =
+      ((sizes.colsC + tile_size - 1) / tile_size) * tile_size;
+
+  return Q.submit([&](sycl::handler &cgh) {
+    auto accA = buffA.template get_access<sycl::access::mode::read>(cgh);
+    auto accB = buffB.template get_access<sycl::access::mode::read>(cgh);
+    auto accC = buffC.template get_access<sycl::access::mode::write>(cgh);
+    sycl::local_accessor<T, 1> tileA(tile_size * tile_size, cgh);
+    sycl::local_accessor<T, 1> tileB(tile_size * tile_size, cgh);
+
+    cgh.parallel_for(
+        sycl::nd_range<3>{{sizes.batch_count, global_rows, global_cols},
+                          {1, tile_size, tile_size}},
+        [=](sycl::nd_item<3> item) {
+          std::size_t batch = item.get_global_id(0);
+          std::size_t row = item.get_global_id(1);
+          std::size_t col = item.get_global_id(2);
+          std::size_t local_row = item.get_local_id(1);
+          std::size_t local_col = item.get_local_id(2);
+          std::size_t offsetA = batch * matrix_sizeA;
+          std::size_t offsetB = batch * matrix_sizeB;
+          T sum = T(0);
+
+          for (std::size_t tile = 0; tile < sizes.inner_size;
+               tile += tile_size) {
+            std::size_t k = tile + local_col;
+            std::size_t key_row = item.get_group(2) * tile_size + local_row;
+
+            tileA[local_row * tile_size + local_col] =
+                row < sizes.rowsC && k < sizes.inner_size
+                    ? accA[offsetA + row * sizes.stored_colsA + k]
+                    : T(0);
+            tileB[local_row * tile_size + local_col] =
+                key_row < sizes.colsC && k < sizes.inner_size
+                    ? accB[offsetB + key_row * sizes.stored_colsB + k]
+                    : T(0);
+
+            item.barrier(sycl::access::fence_space::local_space);
+
+            for (std::size_t inner = 0; inner < tile_size; inner++) {
+              sum += tileA[local_row * tile_size + inner] *
+                     tileB[local_col * tile_size + inner];
+            }
+
+            item.barrier(sycl::access::fence_space::local_space);
+          }
+
+          if (row < sizes.rowsC && col < sizes.colsC) {
+            accC[batch * matrix_sizeC + row * sizes.colsC + col] = sum;
+          }
+        });
+  });
+}
+
+template <typename T>
+sycl::event submit_usm(const Tensor<T> &A, const Tensor<T> &B, Tensor<T> &C,
+                       const BatchedGemmSizes &sizes, bool transpose_A,
+                       bool transpose_B, sycl::queue Q) {
   if (transpose_A) {
     if (transpose_B) {
-      return submit_device_kernel<T, true, true>(
+      return submit_usm_kernel<T, true, true>(
           A.device_data(), B.device_data(), C.device_data(), sizes, Q);
     }
-    return submit_device_kernel<T, true, false>(
+    return submit_usm_kernel<T, true, false>(
         A.device_data(), B.device_data(), C.device_data(), sizes, Q);
   }
   if (transpose_B) {
-    return submit_device_kernel<T, false, true>(
+    return submit_usm_normal_transposed_tiled_kernel<T>(
         A.device_data(), B.device_data(), C.device_data(), sizes, Q);
   }
-  return submit_device_kernel<T, false, false>(A.device_data(), B.device_data(),
-                                               C.device_data(), sizes, Q);
+  return submit_usm_kernel<T, false, false>(A.device_data(), B.device_data(),
+                                            C.device_data(), sizes, Q);
 }
 
 template <typename T>
@@ -138,7 +265,8 @@ sycl::event submit_buffer(sycl::buffer<T, 1> &buffA, sycl::buffer<T, 1> &buffB,
     return submit_buffer_kernel<T, true, false>(buffA, buffB, buffC, sizes, Q);
   }
   if (transpose_B) {
-    return submit_buffer_kernel<T, false, true>(buffA, buffB, buffC, sizes, Q);
+    return submit_buffer_normal_transposed_tiled_kernel<T>(buffA, buffB, buffC,
+                                                           sizes, Q);
   }
   return submit_buffer_kernel<T, false, false>(buffA, buffB, buffC, sizes, Q);
 }
@@ -209,7 +337,7 @@ Tensor<T> tensor_operations::gemm_batched(const Tensor<T> &A,
     }
 
     sycl::event event =
-        submit_device(A, B, C, sizes, transpose_A, transpose_B, Q);
+        submit_usm(A, B, C, sizes, transpose_A, transpose_B, Q);
     if (kernel_event != nullptr) {
       *kernel_event = event;
     }

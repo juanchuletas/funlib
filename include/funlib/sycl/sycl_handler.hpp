@@ -1,14 +1,17 @@
 #if !defined(_SYCL_HANDLER_H_)
 #define _SYCL_HANDLER_H_
+#include <sycl/sycl.hpp>
+
+// SYCL must be included before GLX because X11 defines the None macro.
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
 #include <CL/cl_gl_ext.h>
 #include <GL/glx.h>
+
 #include <algorithm>
 #include <funlib/Tensor/tensor.hpp>
 #include <map>
 #include <string>
-#include <sycl/sycl.hpp>
 namespace flib {
 enum class device { GPU, CPU };
 enum class vendor { INTEL, NVIDIA };
