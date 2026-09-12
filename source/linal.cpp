@@ -1,78 +1,78 @@
 #include <funlib/LinearAlgebra/linal.hpp>
 #include <funlib/sycl/sycl_handler.hpp>
-namespace flib
-{
-    
-    namespace linal
-    {
-        template<typename T>
-        void conjugate_grad(const Tensor<T>& A, const Tensor<T> & b, Tensor<T> & x, int max_iter, T tol){
-            std::size_t N = b.getRows();
-            sycl::queue Q = flib::sycl_handler::get_queue();
-            
-            if(A.getRows() != N || A.getCols() != N || b.getCols() != 1 || x.getCols() != 1 || x.getRows() != N){
-                throw std::invalid_argument("Matrix and vector dimensions do not match");
-            }
-            
-            flib::Tensor<T> r(N);
-            flib::Tensor<T> p(N);
-            flib::Tensor<T> Ap(N);
+namespace flib {
 
-            //Computing the inital residual
+namespace linal {
+template <typename T>
+void conjugate_grad(const Tensor<T> &A, const Tensor<T> &b, Tensor<T> &x,
+                    int max_iter, T tol) {
+  std::size_t N = b.getRows();
+  sycl::queue Q = flib::sycl_handler::get_queue();
 
-            r = flib::tensor_operations::matxvec(A, x, Q);
-            //std::cout << "Initial residual: "<< "\n";
-            //r.print();
-            for(std::size_t i = 0; i < N; i++){
-                r[i] = b[i] - r[i];
-            }
-            //std::cout << "Residual after b-r: "<< "\n";
-            //r.print();
-            p = r;
+  if (A.getRows() != N || A.getCols() != N || b.getCols() != 1 ||
+      x.getCols() != 1 || x.getRows() != N) {
+    throw std::invalid_argument("Matrix and vector dimensions do not match");
+  }
 
-            T old_r = flib::tensor_operations::dot(r, r, Q);
-            // std::cout << "Initial residual: "<< old_r << "\n";
-            int iter = 0;
-            while(iter < max_iter){
+  flib::Tensor<T> r(N);
+  flib::Tensor<T> p(N);
+  flib::Tensor<T> Ap(N);
 
-                Ap = flib::tensor_operations::matxvec(A, p, Q);
-                //std::cout << "Matrix times vector: "<< "\n";
-                //Ap.print();
-                T denominator = flib::tensor_operations::dot(p, Ap, Q);
-                T alpha = old_r / denominator;
+  // Computing the inital residual
 
-                for(std::size_t i = 0; i < N; i++){
-                    x[i] = x[i] + alpha * p[i]; //updates the solution
-                    r[i] = r[i] - alpha * Ap[i]; //updates the residual
-                }   
-                T new_r = flib::tensor_operations::dot(r, r, Q);
-                T currTol = std::sqrt(new_r);
-                if(currTol < tol){
-                    std::cout << "Converged in " << iter + 1 << " iterations.\n";
-                   return;
-                }
+  r = flib::tensor_operations::matxvec(A, x, Q);
+  // std::cout << "Initial residual: "<< "\n";
+  // r.print();
+  for (std::size_t i = 0; i < N; i++) {
+    r[i] = b[i] - r[i];
+  }
+  // std::cout << "Residual after b-r: "<< "\n";
+  // r.print();
+  p = r;
 
-                T beta = new_r / old_r;
-                for(std::size_t i = 0; i < N; i++){
-                    p[i] = r[i] + beta * p[i]; //updates the search direction
-                }
-                old_r = new_r;
-                iter++;
-                
-            }
+  T old_r = flib::tensor_operations::dot(r, r, Q);
+  // std::cout << "Initial residual: "<< old_r << "\n";
+  int iter = 0;
+  while (iter < max_iter) {
 
-            std::cout<< "Reached max iterations without convergence.\n";
+    Ap = flib::tensor_operations::matxvec(A, p, Q);
+    // std::cout << "Matrix times vector: "<< "\n";
+    // Ap.print();
+    T denominator = flib::tensor_operations::dot(p, Ap, Q);
+    T alpha = old_r / denominator;
 
-        }
-       
-        
-        // Other linear algebra functions can be defined here...
-        
-    } // namespace linal
-     //Explicit instantiations (VERY IMPORTANT)
+    for (std::size_t i = 0; i < N; i++) {
+      x[i] = x[i] + alpha * p[i];  // updates the solution
+      r[i] = r[i] - alpha * Ap[i]; // updates the residual
+    }
+    T new_r = flib::tensor_operations::dot(r, r, Q);
+    T currTol = std::sqrt(new_r);
+    if (currTol < tol) {
+      std::cout << "Converged in " << iter + 1 << " iterations.\n";
+      return;
+    }
 
-    template void linal::conjugate_grad(const Tensor<double>&, const Tensor<double>&, Tensor<double>&, int, double);
-    template void linal::conjugate_grad(const Tensor<float>&, const Tensor<float>&, Tensor<float>&, int, float);
-   
+    T beta = new_r / old_r;
+    for (std::size_t i = 0; i < N; i++) {
+      p[i] = r[i] + beta * p[i]; // updates the search direction
+    }
+    old_r = new_r;
+    iter++;
+  }
+
+  std::cout << "Reached max iterations without convergence.\n";
+}
+
+// Other linear algebra functions can be defined here...
+
+} // namespace linal
+  // Explicit instantiations (VERY IMPORTANT)
+
+template void linal::conjugate_grad(const Tensor<double> &,
+                                    const Tensor<double> &, Tensor<double> &,
+                                    int, double);
+template void linal::conjugate_grad(const Tensor<float> &,
+                                    const Tensor<float> &, Tensor<float> &, int,
+                                    float);
 
 } // namespace flib

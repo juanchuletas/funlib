@@ -2,12 +2,11 @@
 #define _ELEMENT_WISE_OPERATIONS_HPP_
 #include <funlib/Tensor/tensor.hpp>
 
+namespace flib::operations {
 
-namespace flib::operations{
-
-template<typename T>
-Tensor<T> scale(const Tensor<T>& input, T value, sycl::queue Q,
-                                   sycl::event* kernel_event = nullptr);
+template <typename T>
+Tensor<T> scale(const Tensor<T> &input, T value, sycl::queue Q,
+                sycl::event *kernel_event = nullptr);
 
 }
 
