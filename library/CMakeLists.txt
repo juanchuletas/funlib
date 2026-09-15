@@ -21,6 +21,7 @@ set(SOURCE_FILES
     ${FUNLIB_SOURCE_DIR}/source/tensor.cpp
     ${FUNLIB_SOURCE_DIR}/source/tensor_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/batched_gemm.cpp
+    ${FUNLIB_SOURCE_DIR}/source/attention_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/elementwise_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/softmax.cpp
     ${FUNLIB_SOURCE_DIR}/source/linal.cpp
@@ -33,6 +34,7 @@ set(HEADER_FILES
     ${FUNLIB_SOURCE_DIR}/include/funlib/Tensor/tensor.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/Tensor/tensor_operations.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/LinearAlgebra/linal.hpp
+    ${FUNLIB_SOURCE_DIR}/include/funlib/operations/attention/attention_operations.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/elementwise_operations/elementwise_operations.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/softmax/softmax.hpp
   
