@@ -164,12 +164,9 @@ int main() {
   projectedK.reshape({batch_size, token_count, head_count, head_size});
   projectedV.reshape({batch_size, token_count, head_count, head_size});
 
-  flib::Tensor<float> Qheads =
-      flib::tensor_operations::permute(projectedQ, {0, 2, 1, 3}, Q);
-  flib::Tensor<float> Kheads =
-      flib::tensor_operations::permute(projectedK, {0, 2, 1, 3}, Q);
-  flib::Tensor<float> Vheads =
-      flib::tensor_operations::permute(projectedV, {0, 2, 1, 3}, Q);
+  flib::Tensor<float> Qheads = flib::operations::split_heads(projectedQ, Q);
+  flib::Tensor<float> Kheads = flib::operations::split_heads(projectedK, Q);
+  flib::Tensor<float> Vheads = flib::operations::split_heads(projectedV, Q);
 
   flib::Tensor<float> scores =
       flib::tensor_operations::gemm_batched(Qheads, Kheads, Q, false, true);
@@ -180,7 +177,7 @@ int main() {
   flib::Tensor<float> head_output =
       flib::tensor_operations::gemm_batched(probabilities, Vheads, Q);
   flib::Tensor<float> joined_output =
-      flib::tensor_operations::permute(head_output, {0, 2, 1, 3}, Q);
+      flib::operations::join_heads(head_output, Q);
   joined_output.reshape({batch_size, token_count, model_size});
   flib::Tensor<float> output =
       flib::tensor_operations::gemm(joined_output, Wo, Q);

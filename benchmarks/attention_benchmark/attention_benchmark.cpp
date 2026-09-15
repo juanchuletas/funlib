@@ -70,11 +70,10 @@ AttentionMeasurements measureAttention(const flib::Tensor<float> &input,
 
     start = Clock::now();
     flib::Tensor<float> query_heads =
-        flib::tensor_operations::permute(query, {0, 2, 1, 3}, queue);
-    flib::Tensor<float> key_heads =
-        flib::tensor_operations::permute(key, {0, 2, 1, 3}, queue);
+        flib::operations::split_heads(query, queue);
+    flib::Tensor<float> key_heads = flib::operations::split_heads(key, queue);
     flib::Tensor<float> value_heads =
-        flib::tensor_operations::permute(value, {0, 2, 1, 3}, queue);
+        flib::operations::split_heads(value, queue);
     result.head_permutations = milliseconds(start, Clock::now());
 
     start = Clock::now();
@@ -99,7 +98,7 @@ AttentionMeasurements measureAttention(const flib::Tensor<float> &input,
 
     start = Clock::now();
     flib::Tensor<float> joined_output =
-        flib::tensor_operations::permute(head_output, {0, 2, 1, 3}, queue);
+        flib::operations::join_heads(head_output, queue);
     joined_output.reshape({shape.batch_size, shape.token_count, model_size});
     result.join_permutation = milliseconds(start, Clock::now());
 
@@ -193,17 +192,17 @@ void printResult(const AttentionShape &shape,
 }
 
 int main() {
-  flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-                                     flib::vendor::NVIDIA, flib::backend::CUDA,
-                                     true);
-  sycl::queue queue = flib::sycl_handler::get_queue("cuda");
-  flib::sycl_handler::get_device_info("cuda");
+    // flib::sycl_handler::register_queue("cuda", flib::device::GPU,
+    //                                    flib::vendor::NVIDIA,
+    //                                    flib::backend::CUDA, true);
+    // sycl::queue queue = flib::sycl_handler::get_queue("cuda");
+    // flib::sycl_handler::get_device_info("cuda");
 
-//    flib::sycl_handler::register_queue("intel", flib::device::GPU,
-//                                      flib::vendor::INTEL, flib::backend::OPENCL,
-//                                      true);
-//   sycl::queue queue = flib::sycl_handler::get_queue("intel");
-//   flib::sycl_handler::get_device_info("intel");
+  flib::sycl_handler::register_queue("intel", flib::device::GPU,
+                                     flib::vendor::INTEL, flib::backend::OPENCL,
+                                     true);
+  sycl::queue queue = flib::sycl_handler::get_queue("intel");
+  flib::sycl_handler::get_device_info("intel");
   const std::vector<AttentionShape> shapes{
       {1, 196, 8, 64},
       {1, 512, 8, 64},
