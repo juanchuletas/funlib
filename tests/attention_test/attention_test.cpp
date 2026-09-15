@@ -170,10 +170,8 @@ int main() {
 
   flib::Tensor<float> scores =
       flib::tensor_operations::gemm_batched(Qheads, Kheads, Q, false, true);
-  flib::Tensor<float> scaled_scores = flib::operations::scale(
+  flib::Tensor<float> probabilities = flib::operations::scaled_softmax(
       scores, 1.0f / std::sqrt(static_cast<float>(head_size)), Q);
-  flib::Tensor<float> probabilities =
-      flib::operations::softmax(scaled_scores, Q);
   flib::Tensor<float> head_output =
       flib::tensor_operations::gemm_batched(probabilities, Vheads, Q);
   flib::Tensor<float> joined_output =

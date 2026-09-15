@@ -19,8 +19,7 @@ struct KernelMeasurements {
   double projections;
   double head_layout;
   double score_gemm;
-  double scale;
-  double softmax;
+  double scaled_softmax;
   double value_gemm;
   double join_heads;
   double output_gemm;
@@ -58,8 +57,7 @@ KernelMeasurements measureKernels(const flib::Tensor<float> &input,
   sycl::event key_layout_event;
   sycl::event value_layout_event;
   sycl::event score_event;
-  sycl::event scale_event;
-  sycl::event softmax_event;
+  sycl::event scaled_softmax_event;
   sycl::event value_gemm_event;
   sycl::event join_event;
   sycl::event output_event;
@@ -88,11 +86,9 @@ KernelMeasurements measureKernels(const flib::Tensor<float> &input,
 
   flib::Tensor<float> scores = flib::tensor_operations::gemm_batched(
       query_heads, key_heads, queue, false, true, &score_event);
-  flib::Tensor<float> scaled_scores = flib::operations::scale(
+  flib::Tensor<float> probabilities = flib::operations::scaled_softmax(
       scores, 1.0f / std::sqrt(static_cast<float>(shape.head_size)), queue,
-      &scale_event);
-  flib::Tensor<float> probabilities =
-      flib::operations::softmax(scaled_scores, queue, &softmax_event);
+      &scaled_softmax_event);
   flib::Tensor<float> head_output = flib::tensor_operations::gemm_batched(
       probabilities, value_heads, queue, false, false, &value_gemm_event);
   flib::Tensor<float> joined_output =
@@ -110,14 +106,13 @@ KernelMeasurements measureKernels(const flib::Tensor<float> &input,
                        kernelMilliseconds(key_layout_event) +
                        kernelMilliseconds(value_layout_event);
   result.score_gemm = kernelMilliseconds(score_event);
-  result.scale = kernelMilliseconds(scale_event);
-  result.softmax = kernelMilliseconds(softmax_event);
+  result.scaled_softmax = kernelMilliseconds(scaled_softmax_event);
   result.value_gemm = kernelMilliseconds(value_gemm_event);
   result.join_heads = kernelMilliseconds(join_event);
   result.output_gemm = kernelMilliseconds(output_event);
   result.total = result.projections + result.head_layout + result.score_gemm +
-                 result.scale + result.softmax + result.value_gemm +
-                 result.join_heads + result.output_gemm;
+                 result.scaled_softmax + result.value_gemm + result.join_heads +
+                 result.output_gemm;
   return result;
 }
 
@@ -175,8 +170,7 @@ KernelMeasurements benchmarkKernels(const AttentionShape &shape,
       median(measurements, &KernelMeasurements::projections),
       median(measurements, &KernelMeasurements::head_layout),
       median(measurements, &KernelMeasurements::score_gemm),
-      median(measurements, &KernelMeasurements::scale),
-      median(measurements, &KernelMeasurements::softmax),
+      median(measurements, &KernelMeasurements::scaled_softmax),
       median(measurements, &KernelMeasurements::value_gemm),
       median(measurements, &KernelMeasurements::join_heads),
       median(measurements, &KernelMeasurements::output_gemm),
@@ -191,8 +185,8 @@ void printResult(const AttentionShape &shape,
             << shape.token_count << std::setw(8) << shape.head_count
             << std::setw(13) << measurements.projections << std::setw(13)
             << measurements.head_layout << std::setw(13)
-            << measurements.score_gemm << std::setw(11) << measurements.scale
-            << std::setw(11) << measurements.softmax << std::setw(13)
+            << measurements.score_gemm << std::setw(16)
+            << measurements.scaled_softmax << std::setw(13)
             << measurements.value_gemm << std::setw(13)
             << measurements.join_heads << std::setw(13)
             << measurements.output_gemm << std::setw(13) << measurements.total
@@ -200,16 +194,16 @@ void printResult(const AttentionShape &shape,
 }
 
 int main() {
-//   flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-//                                      flib::vendor::NVIDIA, flib::backend::CUDA,
+    flib::sycl_handler::register_queue("cuda", flib::device::GPU,
+                                       flib::vendor::NVIDIA,
+                                       flib::backend::CUDA, true);
+    sycl::queue queue = flib::sycl_handler::get_queue("cuda");
+    flib::sycl_handler::get_device_info("cuda");
+//   flib::sycl_handler::register_queue("intel", flib::device::GPU,
+//                                      flib::vendor::INTEL, flib::backend::OPENCL,
 //                                      true);
-//   sycl::queue queue = flib::sycl_handler::get_queue("cuda");
-//   flib::sycl_handler::get_device_info("cuda");
-  flib::sycl_handler::register_queue("intel", flib::device::GPU,
-                                     flib::vendor::INTEL, flib::backend::OPENCL,
-                                     true);
-  sycl::queue queue = flib::sycl_handler::get_queue("intel");
-  flib::sycl_handler::get_device_info("intel");
+//   sycl::queue queue = flib::sycl_handler::get_queue("intel");
+//   flib::sycl_handler::get_device_info("intel");
   const std::vector<AttentionShape> shapes{
       {1, 196, 8, 64},
       {1, 512, 8, 64},
@@ -219,11 +213,10 @@ int main() {
   std::cout << std::fixed << std::setprecision(3);
   std::cout << std::setw(5) << "B" << std::setw(8) << "Tokens" << std::setw(8)
             << "Heads" << std::setw(13) << "QKV GEMM" << std::setw(13)
-            << "Head layout" << std::setw(13) << "QK GEMM" << std::setw(11)
-            << "Scale" << std::setw(11) << "Softmax" << std::setw(13)
-            << "PV GEMM" << std::setw(13) << "Join" << std::setw(13)
-            << "Output GEMM" << std::setw(13) << "Kernel ms" << std::setw(15)
-            << "Kernel tokens/s" << std::endl;
+            << "Head layout" << std::setw(13) << "QK GEMM" << std::setw(16)
+            << "Scaled Softmax" << std::setw(13) << "PV GEMM" << std::setw(13)
+            << "Join" << std::setw(13) << "Output GEMM" << std::setw(13)
+            << "Kernel ms" << std::setw(15) << "Kernel tokens/s" << std::endl;
 
   for (const AttentionShape &shape : shapes) {
     printResult(shape, benchmarkKernels(shape, queue));

@@ -19,8 +19,7 @@ struct AttentionMeasurements {
   double projections;
   double head_permutations;
   double score_gemm;
-  double scale;
-  double softmax;
+  double scaled_softmax;
   double value_gemm;
   double join_permutation;
   double output_gemm;
@@ -82,14 +81,9 @@ AttentionMeasurements measureAttention(const flib::Tensor<float> &input,
     result.score_gemm = milliseconds(start, Clock::now());
 
     start = Clock::now();
-    flib::Tensor<float> scaled_scores = flib::operations::scale(
+    flib::Tensor<float> probabilities = flib::operations::scaled_softmax(
         scores, 1.0f / std::sqrt(static_cast<float>(shape.head_size)), queue);
-    result.scale = milliseconds(start, Clock::now());
-
-    start = Clock::now();
-    flib::Tensor<float> probabilities =
-        flib::operations::softmax(scaled_scores, queue);
-    result.softmax = milliseconds(start, Clock::now());
+    result.scaled_softmax = milliseconds(start, Clock::now());
 
     start = Clock::now();
     flib::Tensor<float> head_output = flib::tensor_operations::gemm_batched(
@@ -167,8 +161,7 @@ AttentionMeasurements benchmarkAttention(const AttentionShape &shape,
       median(measurements, &AttentionMeasurements::projections),
       median(measurements, &AttentionMeasurements::head_permutations),
       median(measurements, &AttentionMeasurements::score_gemm),
-      median(measurements, &AttentionMeasurements::scale),
-      median(measurements, &AttentionMeasurements::softmax),
+      median(measurements, &AttentionMeasurements::scaled_softmax),
       median(measurements, &AttentionMeasurements::value_gemm),
       median(measurements, &AttentionMeasurements::join_permutation),
       median(measurements, &AttentionMeasurements::output_gemm),
@@ -183,8 +176,8 @@ void printResult(const AttentionShape &shape,
             << shape.token_count << std::setw(8) << shape.head_count
             << std::setw(13) << measurements.projections << std::setw(13)
             << measurements.head_permutations << std::setw(13)
-            << measurements.score_gemm << std::setw(11) << measurements.scale
-            << std::setw(11) << measurements.softmax << std::setw(13)
+            << measurements.score_gemm << std::setw(16)
+            << measurements.scaled_softmax << std::setw(13)
             << measurements.value_gemm << std::setw(13)
             << measurements.join_permutation << std::setw(13)
             << measurements.output_gemm << std::setw(13) << measurements.total
@@ -192,11 +185,11 @@ void printResult(const AttentionShape &shape,
 }
 
 int main() {
-    // flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-    //                                    flib::vendor::NVIDIA,
-    //                                    flib::backend::CUDA, true);
-    // sycl::queue queue = flib::sycl_handler::get_queue("cuda");
-    // flib::sycl_handler::get_device_info("cuda");
+  // flib::sycl_handler::register_queue("cuda", flib::device::GPU,
+  //                                    flib::vendor::NVIDIA,
+  //                                    flib::backend::CUDA, true);
+  // sycl::queue queue = flib::sycl_handler::get_queue("cuda");
+  // flib::sycl_handler::get_device_info("cuda");
 
   flib::sycl_handler::register_queue("intel", flib::device::GPU,
                                      flib::vendor::INTEL, flib::backend::OPENCL,
@@ -212,11 +205,10 @@ int main() {
   std::cout << std::fixed << std::setprecision(3);
   std::cout << std::setw(5) << "B" << std::setw(8) << "Tokens" << std::setw(8)
             << "Heads" << std::setw(13) << "QKV GEMM" << std::setw(13)
-            << "QKV permute" << std::setw(13) << "QK GEMM" << std::setw(11)
-            << "Scale" << std::setw(11) << "Softmax" << std::setw(13)
-            << "PV GEMM" << std::setw(13) << "Join" << std::setw(13)
-            << "Output GEMM" << std::setw(13) << "Total ms" << std::setw(15)
-            << "Tokens/s" << std::endl;
+            << "QKV permute" << std::setw(13) << "QK GEMM" << std::setw(16)
+            << "Scaled Softmax" << std::setw(13) << "PV GEMM" << std::setw(13)
+            << "Join" << std::setw(13) << "Output GEMM" << std::setw(13)
+            << "Total ms" << std::setw(15) << "Tokens/s" << std::endl;
 
   for (const AttentionShape &shape : shapes) {
     printResult(shape, benchmarkAttention(shape, queue));
