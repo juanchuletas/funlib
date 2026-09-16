@@ -194,16 +194,16 @@ void printResult(const AttentionShape &shape,
 }
 
 int main() {
-    flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-                                       flib::vendor::NVIDIA,
-                                       flib::backend::CUDA, true);
-    sycl::queue queue = flib::sycl_handler::get_queue("cuda");
-    flib::sycl_handler::get_device_info("cuda");
-//   flib::sycl_handler::register_queue("intel", flib::device::GPU,
-//                                      flib::vendor::INTEL, flib::backend::OPENCL,
-//                                      true);
-//   sycl::queue queue = flib::sycl_handler::get_queue("intel");
-//   flib::sycl_handler::get_device_info("intel");
+    // flib::sycl_handler::register_queue("cuda", flib::device::GPU,
+    //                                    flib::vendor::NVIDIA,
+    //                                    flib::backend::CUDA, true);
+    // sycl::queue queue = flib::sycl_handler::get_queue("cuda");
+    // flib::sycl_handler::get_device_info("cuda");
+  flib::sycl_handler::register_queue("intel", flib::device::GPU,
+                                     flib::vendor::INTEL, flib::backend::OPENCL,
+                                     true);
+  sycl::queue queue = flib::sycl_handler::get_queue("intel");
+  flib::sycl_handler::get_device_info("intel");
   const std::vector<AttentionShape> shapes{
       {1, 196, 8, 64},
       {1, 512, 8, 64},
