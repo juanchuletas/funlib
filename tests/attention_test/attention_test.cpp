@@ -164,19 +164,9 @@ int main() {
   projectedK.reshape({batch_size, token_count, head_count, head_size});
   projectedV.reshape({batch_size, token_count, head_count, head_size});
 
-  flib::Tensor<float> Qheads = flib::operations::split_heads(projectedQ, Q);
-  flib::Tensor<float> Kheads = flib::operations::split_heads(projectedK, Q);
-  flib::Tensor<float> Vheads = flib::operations::split_heads(projectedV, Q);
-
-  flib::Tensor<float> scores =
-      flib::tensor_operations::gemm_batched(Qheads, Kheads, Q, false, true);
-  flib::Tensor<float> probabilities = flib::operations::scaled_softmax(
-      scores, 1.0f / std::sqrt(static_cast<float>(head_size)), Q);
-  flib::Tensor<float> head_output =
-      flib::tensor_operations::gemm_batched(probabilities, Vheads, Q);
   flib::Tensor<float> joined_output =
-      flib::operations::join_heads(head_output, Q);
-  joined_output.reshape({batch_size, token_count, model_size});
+      flib::operations::scaled_dot_product_attention(
+          projectedQ, projectedK, projectedV, head_count, Q);
   flib::Tensor<float> output =
       flib::tensor_operations::gemm(joined_output, Wo, Q);
 
