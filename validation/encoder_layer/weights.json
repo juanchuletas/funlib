@@ -1,0 +1,16 @@
+{
+  "weights": [
+    {"name": "self_attn.in_proj_weight", "shape": [192, 64], "dtype": "float32", "file": "ref_weight_self_attn_in_proj_weight.bin"},
+    {"name": "self_attn.in_proj_bias", "shape": [192], "dtype": "float32", "file": "ref_weight_self_attn_in_proj_bias.bin"},
+    {"name": "self_attn.out_proj.weight", "shape": [64, 64], "dtype": "float32", "file": "ref_weight_self_attn_out_proj_weight.bin"},
+    {"name": "self_attn.out_proj.bias", "shape": [64], "dtype": "float32", "file": "ref_weight_self_attn_out_proj_bias.bin"},
+    {"name": "linear1.weight", "shape": [256, 64], "dtype": "float32", "file": "ref_weight_linear1_weight.bin"},
+    {"name": "linear1.bias", "shape": [256], "dtype": "float32", "file": "ref_weight_linear1_bias.bin"},
+    {"name": "linear2.weight", "shape": [64, 256], "dtype": "float32", "file": "ref_weight_linear2_weight.bin"},
+    {"name": "linear2.bias", "shape": [64], "dtype": "float32", "file": "ref_weight_linear2_bias.bin"},
+    {"name": "norm1.weight", "shape": [64], "dtype": "float32", "file": "ref_weight_norm1_weight.bin"},
+    {"name": "norm1.bias", "shape": [64], "dtype": "float32", "file": "ref_weight_norm1_bias.bin"},
+    {"name": "norm2.weight", "shape": [64], "dtype": "float32", "file": "ref_weight_norm2_weight.bin"},
+    {"name": "norm2.bias", "shape": [64], "dtype": "float32", "file": "ref_weight_norm2_bias.bin"}
+  ]
+}

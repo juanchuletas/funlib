@@ -2,5 +2,6 @@
 
 include(CMakeFindDependencyMacro)
 find_dependency(OpenCL)
+find_dependency(nlohmann_json 3.2.0)
 include("${CMAKE_CURRENT_LIST_DIR}/funlibTargets.cmake")
 check_required_components(funlib)
