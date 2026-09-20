@@ -1,8 +1,8 @@
 #ifndef FUNLIB_WEIGHT_LOADER_HPP
 #define FUNLIB_WEIGHT_LOADER_HPP
 
-#include <funlib/Tensor/tensor.hpp>
 #include <filesystem>
+#include <funlib/Tensor/tensor.hpp>
 #include <optional>
 #include <string>
 #include <unordered_map>

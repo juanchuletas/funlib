@@ -28,7 +28,8 @@ std::vector<float> loadReference(const std::string &path) {
   }
   constexpr std::streamsize bytes = element_count * sizeof(float);
   if (file.tellg() != std::streampos(bytes)) {
-    throw std::runtime_error(path + " must contain exactly 512 float32 values (2048 bytes)");
+    throw std::runtime_error(
+        path + " must contain exactly 512 float32 values (2048 bytes)");
   }
   file.seekg(0);
   std::vector<float> values(element_count);
@@ -50,14 +51,14 @@ int main(int argc, char **argv) {
     return 1;
   }
   try {
-    const auto input_values = loadReference(
-        argc == 3 ? argv[1] : "ref_layernorm_input.bin");
-    const auto expected = loadReference(
-        argc == 3 ? argv[2] : "ref_layernorm_output.bin");
+    const auto input_values =
+        loadReference(argc == 3 ? argv[1] : "ref_layernorm_input.bin");
+    const auto expected =
+        loadReference(argc == 3 ? argv[2] : "ref_layernorm_output.bin");
 
     flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-                                       flib::vendor::NVIDIA, flib::backend::CUDA,
-                                       true);
+                                       flib::vendor::NVIDIA,
+                                       flib::backend::CUDA, true);
     sycl::queue queue = flib::sycl_handler::get_queue("cuda");
     flib::sycl_handler::get_device_info("cuda");
 
@@ -70,12 +71,15 @@ int main(int argc, char **argv) {
     gamma.copy_from(gamma_values.data(), queue).wait_and_throw();
     beta.copy_from(beta_values.data(), queue).wait_and_throw();
 
-    auto output = flib::operations::layer_norm(input, gamma, beta, epsilon, queue);
+    auto output =
+        flib::operations::layer_norm(input, gamma, beta, epsilon, queue);
     queue.wait_and_throw();
     const auto actual = output.to_host(queue);
     queue.wait_and_throw();
-    if (output.getShape() != input.getShape() || actual.size() != expected.size()) {
-      throw std::runtime_error("LayerNorm returned an unexpected shape or size");
+    if (output.getShape() != input.getShape() ||
+        actual.size() != expected.size()) {
+      throw std::runtime_error(
+          "LayerNorm returned an unexpected shape or size");
     }
 
     double max_difference = 0.0;
@@ -84,8 +88,9 @@ int main(int argc, char **argv) {
         max_difference = std::numeric_limits<double>::infinity();
         break;
       }
-      max_difference = std::max(
-          max_difference, std::abs(static_cast<double>(actual[i]) - expected[i]));
+      max_difference =
+          std::max(max_difference,
+                   std::abs(static_cast<double>(actual[i]) - expected[i]));
     }
     const bool passed = max_difference < tolerance;
     std::cout << std::setprecision(10)

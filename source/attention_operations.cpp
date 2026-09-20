@@ -1,5 +1,5 @@
-#include <funlib/operations/attention/attention_operations.hpp>
 #include <funlib/Tensor/tensor_operations.hpp>
+#include <funlib/operations/attention/attention_operations.hpp>
 #include <funlib/operations/softmax/softmax.hpp>
 
 #include <cmath>
@@ -225,16 +225,14 @@ Tensor<T> scaled_dot_product_attention(const Tensor<T> &query,
   const std::vector<std::size_t> &query_shape = query.getShape();
   const std::vector<std::size_t> &key_shape = key.getShape();
   const std::vector<std::size_t> &value_shape = value.getShape();
-  if (query_shape[0] != key_shape[0] ||
-      query_shape[0] != value_shape[0]) {
+  if (query_shape[0] != key_shape[0] || query_shape[0] != value_shape[0]) {
     throw std::invalid_argument("Attention batch dimensions must match");
   }
   if (query_shape[2] != head_count || key_shape[2] != head_count ||
       value_shape[2] != head_count) {
     throw std::invalid_argument("Attention tensor head counts must match");
   }
-  if (query_shape[3] != key_shape[3] ||
-      query_shape[3] != value_shape[3]) {
+  if (query_shape[3] != key_shape[3] || query_shape[3] != value_shape[3]) {
     throw std::invalid_argument("Attention head sizes must match");
   }
   if (key_shape[1] != value_shape[1]) {
@@ -245,16 +243,15 @@ Tensor<T> scaled_dot_product_attention(const Tensor<T> &query,
   Tensor<T> query_heads = split_heads(query, Q);
   Tensor<T> key_heads = split_heads(key, Q);
   Tensor<T> value_heads = split_heads(value, Q);
-  Tensor<T> scores = tensor_operations::gemm_batched(
-      query_heads, key_heads, Q, false, true);
+  Tensor<T> scores =
+      tensor_operations::gemm_batched(query_heads, key_heads, Q, false, true);
   T scale =
       T(1) / static_cast<T>(std::sqrt(static_cast<double>(query_shape[3])));
   Tensor<T> probabilities = scaled_softmax(scores, scale, Q);
   Tensor<T> head_output =
       tensor_operations::gemm_batched(probabilities, value_heads, Q);
   Tensor<T> output = join_heads(head_output, Q);
-  output.reshape(
-      {query_shape[0], query_shape[1], head_count * query_shape[3]});
+  output.reshape({query_shape[0], query_shape[1], head_count * query_shape[3]});
   return output;
 }
 
@@ -270,10 +267,12 @@ template Tensor<float> join_heads(const Tensor<float> &, sycl::queue,
                                   sycl::event *);
 template Tensor<int> join_heads(const Tensor<int> &, sycl::queue,
                                 sycl::event *);
-template Tensor<double>
-scaled_dot_product_attention(const Tensor<double> &, const Tensor<double> &,
-                             const Tensor<double> &, std::size_t, sycl::queue);
-template Tensor<float>
-scaled_dot_product_attention(const Tensor<float> &, const Tensor<float> &,
-                             const Tensor<float> &, std::size_t, sycl::queue);
+template Tensor<double> scaled_dot_product_attention(const Tensor<double> &,
+                                                     const Tensor<double> &,
+                                                     const Tensor<double> &,
+                                                     std::size_t, sycl::queue);
+template Tensor<float> scaled_dot_product_attention(const Tensor<float> &,
+                                                    const Tensor<float> &,
+                                                    const Tensor<float> &,
+                                                    std::size_t, sycl::queue);
 } // namespace flib::operations

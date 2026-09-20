@@ -62,14 +62,14 @@ int main(int argc, char **argv) {
     return 1;
   }
   try {
-    const auto values = loadReference(
-        argc == 3 ? argv[1] : "ref_gelu_input.bin");
-    const auto expected = loadReference(
-        argc == 3 ? argv[2] : "ref_gelu_output.bin");
+    const auto values =
+        loadReference(argc == 3 ? argv[1] : "ref_gelu_input.bin");
+    const auto expected =
+        loadReference(argc == 3 ? argv[2] : "ref_gelu_output.bin");
 
     flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-                                     flib::vendor::NVIDIA, flib::backend::CUDA,
-                                     true);
+                                       flib::vendor::NVIDIA,
+                                       flib::backend::CUDA, true);
     sycl::queue queue = flib::sycl_handler::get_queue("cuda");
     flib::sycl_handler::get_device_info("cuda");
     flib::Tensor<float> input({1, row_count, row_size}, queue);
@@ -78,7 +78,8 @@ int main(int argc, char **argv) {
     queue.wait_and_throw();
     const auto actual = output.to_host(queue);
     queue.wait_and_throw();
-    if (output.getShape() != input.getShape() || actual.size() != expected.size()) {
+    if (output.getShape() != input.getShape() ||
+        actual.size() != expected.size()) {
       throw std::runtime_error("GELU returned an unexpected shape or size");
     }
 
@@ -95,8 +96,9 @@ int main(int argc, char **argv) {
         max_difference = std::numeric_limits<double>::infinity();
         break;
       }
-      max_difference = std::max(
-          max_difference, std::abs(static_cast<double>(actual[i]) - expected[i]));
+      max_difference =
+          std::max(max_difference,
+                   std::abs(static_cast<double>(actual[i]) - expected[i]));
     }
     const bool passed = max_difference < 1.0e-4;
     std::cout << "\nMax absolute difference: " << max_difference << '\n'

@@ -18,7 +18,8 @@ static_assert(sizeof(float) == 4 && std::numeric_limits<float>::is_iec559,
 
 std::string stringField(const nlohmann::json &entry, const char *key) {
   if (!entry.contains(key) || !entry.at(key).is_string()) {
-    throw std::runtime_error(std::string("Missing or invalid string field: ") + key);
+    throw std::runtime_error(std::string("Missing or invalid string field: ") +
+                             key);
   }
   auto value = entry.at(key).get<std::string>();
   if (value.empty() || value.find('\0') != std::string::npos) {
@@ -52,25 +53,30 @@ WeightLoader::WeightLoader(const std::filesystem::path &manifest,
           throw std::runtime_error("Duplicate weight name");
         }
         if (stringField(entry, "dtype") != "float32") {
-          throw std::runtime_error("Only dtype float32 is supported; convert during export");
+          throw std::runtime_error(
+              "Only dtype float32 is supported; convert during export");
         }
         if (!entry.contains("shape") || !entry.at("shape").is_array() ||
             entry.at("shape").empty()) {
-          throw std::runtime_error("Shape must be a nonempty array; scalar tensors are unsupported");
+          throw std::runtime_error(
+              "Shape must be a nonempty array; scalar tensors are unsupported");
         }
         std::vector<std::size_t> shape;
         std::size_t count = 1;
         for (const auto &dimension : entry.at("shape")) {
           if (!dimension.is_number_integer() ||
-              (!dimension.is_number_unsigned() && dimension.get<std::int64_t>() < 0)) {
-            throw std::runtime_error("Shape dimensions must be nonnegative integers");
+              (!dimension.is_number_unsigned() &&
+               dimension.get<std::int64_t>() < 0)) {
+            throw std::runtime_error(
+                "Shape dimensions must be nonnegative integers");
           }
           const auto value = dimension.get<std::uint64_t>();
           if (value > std::numeric_limits<std::size_t>::max()) {
             throw std::runtime_error("Shape dimension is too large");
           }
           const auto size = static_cast<std::size_t>(value);
-          if (size != 0 && count > std::numeric_limits<std::size_t>::max() / size) {
+          if (size != 0 &&
+              count > std::numeric_limits<std::size_t>::max() / size) {
             throw std::runtime_error("Shape element count overflow");
           }
           count *= size;
@@ -78,23 +84,27 @@ WeightLoader::WeightLoader(const std::filesystem::path &manifest,
         }
         if (count > std::numeric_limits<std::size_t>::max() / sizeof(float) ||
             count > static_cast<std::uintmax_t>(
-                        std::numeric_limits<std::streamsize>::max()) / sizeof(float)) {
+                        std::numeric_limits<std::streamsize>::max()) /
+                        sizeof(float)) {
           throw std::runtime_error("Tensor byte count overflow");
         }
         const auto bytes = static_cast<std::streamsize>(count * sizeof(float));
         const std::filesystem::path relative(stringField(entry, "file"));
         if (relative.is_absolute() || relative.has_root_path()) {
-          throw std::runtime_error("Weight file must be relative to the manifest directory");
+          throw std::runtime_error(
+              "Weight file must be relative to the manifest directory");
         }
         const auto path = std::filesystem::canonical(base / relative);
         const auto within = path.lexically_relative(base);
         if (within.empty() || *within.begin() == ".." ||
             !std::filesystem::is_regular_file(path)) {
-          throw std::runtime_error("Weight file must be a regular file within the manifest directory");
+          throw std::runtime_error("Weight file must be a regular file within "
+                                   "the manifest directory");
         }
         std::ifstream binary(path, std::ios::binary | std::ios::ate);
         if (!binary || binary.tellg() != std::streampos(bytes)) {
-          throw std::runtime_error("Missing or incorrectly sized binary: " + path.string());
+          throw std::runtime_error("Missing or incorrectly sized binary: " +
+                                   path.string());
         }
         binary.seekg(0);
         std::vector<float> values(count);
@@ -125,7 +135,8 @@ WeightLoader::WeightLoader(const std::filesystem::path &manifest,
       }
     }
   } catch (const std::exception &error) {
-    throw std::runtime_error("WeightLoader '" + manifest.string() + "': " + error.what());
+    throw std::runtime_error("WeightLoader '" + manifest.string() +
+                             "': " + error.what());
   }
 }
 

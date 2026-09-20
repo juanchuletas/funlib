@@ -65,14 +65,14 @@ int main(int argc, char **argv) {
     return 1;
   }
   try {
-    const auto values = loadReference(
-        argc == 3 ? argv[1] : "ref_softmax_input.bin");
-    const auto expected = loadReference(
-        argc == 3 ? argv[2] : "ref_softmax_output.bin");
+    const auto values =
+        loadReference(argc == 3 ? argv[1] : "ref_softmax_input.bin");
+    const auto expected =
+        loadReference(argc == 3 ? argv[2] : "ref_softmax_output.bin");
 
     flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-                                     flib::vendor::NVIDIA, flib::backend::CUDA,
-                                     true);
+                                       flib::vendor::NVIDIA,
+                                       flib::backend::CUDA, true);
     sycl::queue queue = flib::sycl_handler::get_queue("cuda");
     flib::sycl_handler::get_device_info("cuda");
     flib::Tensor<float> input({1, row_count, row_size}, queue);
@@ -82,7 +82,8 @@ int main(int argc, char **argv) {
     queue.wait_and_throw();
     const auto actual = output.to_host(queue);
     queue.wait_and_throw();
-    if (output.getShape() != input.getShape() || actual.size() != expected.size()) {
+    if (output.getShape() != input.getShape() ||
+        actual.size() != expected.size()) {
       throw std::runtime_error("Softmax returned an unexpected shape or size");
     }
 
@@ -109,7 +110,7 @@ int main(int argc, char **argv) {
             std::abs(static_cast<double>(actual[index]) - expected[index]));
       }
       const double error = finite_row ? std::abs(sum - 1.0)
-                                     : std::numeric_limits<double>::infinity();
+                                      : std::numeric_limits<double>::infinity();
       max_row_sum_error = std::max(max_row_sum_error, error);
       if (error > 1.0e-6) {
         rows_passed = false;
@@ -122,10 +123,10 @@ int main(int argc, char **argv) {
     }
     const bool reference_passed = max_difference < 1.0e-4;
     const bool passed = reference_passed && rows_passed;
-    std::cout << "\nMax absolute difference: " << max_difference
-              << " (" << (reference_passed ? "PASS" : "FAIL") << ")\n"
-              << "Max row sum error: " << max_row_sum_error
-              << " (" << (rows_passed ? "PASS" : "FAIL") << ")\n"
+    std::cout << "\nMax absolute difference: " << max_difference << " ("
+              << (reference_passed ? "PASS" : "FAIL") << ")\n"
+              << "Max row sum error: " << max_row_sum_error << " ("
+              << (rows_passed ? "PASS" : "FAIL") << ")\n"
               << (passed ? "PASS" : "FAIL") << '\n';
     return passed ? 0 : 1;
   } catch (const std::exception &error) {

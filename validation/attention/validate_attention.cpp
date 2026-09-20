@@ -117,8 +117,8 @@ bool compare(const char *name, const std::vector<float> &actual,
   }
   const bool passed = max_difference < tolerance;
   std::cout << name << " max absolute difference: " << max_difference
-            << " (threshold " << tolerance << ") "
-            << (passed ? "PASS" : "FAIL") << '\n';
+            << " (threshold " << tolerance << ") " << (passed ? "PASS" : "FAIL")
+            << '\n';
   return passed;
 }
 } // namespace
@@ -130,20 +130,20 @@ int main(int argc, char **argv) {
     return 1;
   }
   try {
-    const auto q_values = loadReference(
-        argc == 6 ? argv[1] : "ref_attn_Q.bin", input_count);
-    const auto k_values = loadReference(
-        argc == 6 ? argv[2] : "ref_attn_K.bin", input_count);
-    const auto v_values = loadReference(
-        argc == 6 ? argv[3] : "ref_attn_V.bin", input_count);
-    const auto expected_output = loadReference(
-        argc == 6 ? argv[4] : "ref_attn_out.bin", input_count);
+    const auto q_values =
+        loadReference(argc == 6 ? argv[1] : "ref_attn_Q.bin", input_count);
+    const auto k_values =
+        loadReference(argc == 6 ? argv[2] : "ref_attn_K.bin", input_count);
+    const auto v_values =
+        loadReference(argc == 6 ? argv[3] : "ref_attn_V.bin", input_count);
+    const auto expected_output =
+        loadReference(argc == 6 ? argv[4] : "ref_attn_out.bin", input_count);
     const auto expected_weights = loadReference(
         argc == 6 ? argv[5] : "ref_attn_weights.bin", weight_count);
 
     flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-                                     flib::vendor::NVIDIA, flib::backend::CUDA,
-                                     true);
+                                       flib::vendor::NVIDIA,
+                                       flib::backend::CUDA, true);
     sycl::queue queue = flib::sycl_handler::get_queue("cuda");
     flib::sycl_handler::get_device_info("cuda");
     auto query = deviceTensor(q_values, queue);
@@ -154,18 +154,18 @@ int main(int argc, char **argv) {
     auto query_heads = flib::operations::split_heads(query, queue);
     auto key_heads = flib::operations::split_heads(key, queue);
     auto value_heads = flib::operations::split_heads(value, queue);
-    auto scores = flib::tensor_operations::gemm_batched(
-        query_heads, key_heads, queue, false, true);
+    auto scores = flib::tensor_operations::gemm_batched(query_heads, key_heads,
+                                                        queue, false, true);
     const float scale = 1.0f / std::sqrt(static_cast<float>(head_size));
     auto weights = flib::operations::scaled_softmax(scores, scale, queue);
     const auto actual_weights = readOutput(
         weights, {batch_size, head_count, token_count, token_count}, queue);
-    auto context = flib::tensor_operations::gemm_batched(
-        weights, value_heads, queue);
+    auto context =
+        flib::tensor_operations::gemm_batched(weights, value_heads, queue);
     auto output = flib::operations::join_heads(context, queue);
     output.reshape({batch_size, token_count, head_size});
-    const auto actual_output = readOutput(
-        output, {batch_size, token_count, head_size}, queue);
+    const auto actual_output =
+        readOutput(output, {batch_size, token_count, head_size}, queue);
 
     // Also exercise the public entry point used by attention_test.cpp.
     auto attention_output = flib::operations::scaled_dot_product_attention(
@@ -179,8 +179,9 @@ int main(int argc, char **argv) {
                                         expected_weights, token_count, 1.0e-4);
     const bool output_passed = compare("Pipeline output", actual_output,
                                        expected_output, head_size, 1.0e-3);
-    const bool attention_passed = compare("Attention API output", actual_attention,
-                                          expected_output, head_size, 1.0e-3);
+    const bool attention_passed =
+        compare("Attention API output", actual_attention, expected_output,
+                head_size, 1.0e-3);
     const bool passed = weights_passed && output_passed && attention_passed;
     std::cout << '\n' << (passed ? "PASS" : "FAIL") << '\n';
     return passed ? 0 : 1;
