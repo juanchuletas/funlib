@@ -23,6 +23,53 @@ The main goals are:
 
 ## Current features
 
+### Loading model weights
+
+`flib::WeightLoader` loads a JSON manifest and its binary files into a named map
+of `Tensor<float>` objects. Building funlib now requires the header-only
+`nlohmann_json` package (version 3.2.0 or newer), discoverable by CMake.
+
+```json
+{
+  "weights": [
+    {
+      "name": "encoder.layer.0.norm1.weight",
+      "shape": [768],
+      "dtype": "float32",
+      "file": "encoder_layer_0_norm1_weight.bin"
+    }
+  ]
+}
+```
+
+Binary files must contain contiguous row-major, little-endian IEEE 754 float32
+values with no header. Paths are relative to the manifest directory and must
+resolve inside that directory. Names must be unique, and file sizes must match
+the shapes exactly. Other dtypes require conversion by the exporter. Scalar
+shapes (`[]`) are currently unsupported by `Tensor`; zero-sized dimensions are
+accepted. Values and layouts are preserved without transposition or normalization.
+
+```cpp
+#include <funlib/funlib.hpp>
+
+flib::WeightLoader host_weights("model/weights.json");
+const auto &gamma = host_weights.at("encoder.layer.0.norm1.weight");
+
+// Alternatively, upload every weight using an already configured SYCL queue.
+// Prefer this constructor directly for GPU inference to avoid retaining a
+// second full copy of the checkpoint on the host.
+flib::WeightLoader device_weights("model/weights.json", queue);
+const auto &device_gamma = device_weights.at("encoder.layer.0.norm1.weight");
+```
+
+`contains(name)`, `size()`, and `weights()` support discovery and iteration.
+`at(name)` returns a const reference owned by the loader; keep the loader alive
+while using it. Loading is eager, and device uploads complete before the
+constructor returns. A load failure throws with manifest/weight context;
+missing lookups throw `std::out_of_range`. Device loading stages one tensor at
+a time on the host. Checkpoint export and model-specific parameter mapping belong
+in the application; the loader does not wire weights into an architecture.
+
 ### Tensor storage
 
 Funlib provides the `Tensor<T>` class with row major storage.

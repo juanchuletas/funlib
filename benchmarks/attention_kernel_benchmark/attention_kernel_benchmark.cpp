@@ -194,11 +194,11 @@ void printResult(const AttentionShape &shape,
 }
 
 int main() {
-    // flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-    //                                    flib::vendor::NVIDIA,
-    //                                    flib::backend::CUDA, true);
-    // sycl::queue queue = flib::sycl_handler::get_queue("cuda");
-    // flib::sycl_handler::get_device_info("cuda");
+  // flib::sycl_handler::register_queue("cuda", flib::device::GPU,
+  //                                    flib::vendor::NVIDIA,
+  //                                    flib::backend::CUDA, true);
+  // sycl::queue queue = flib::sycl_handler::get_queue("cuda");
+  // flib::sycl_handler::get_device_info("cuda");
   flib::sycl_handler::register_queue("intel", flib::device::GPU,
                                      flib::vendor::INTEL, flib::backend::OPENCL,
                                      true);

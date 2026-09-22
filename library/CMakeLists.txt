@@ -12,11 +12,13 @@ message("DPCPP compiler path: ${CMAKE_CXX_COMPILER}")
 set(FUNLIB_SYCL_TARGETS spir64,nvptx64-nvidia-cuda)
 # Find OpenCL package (required for cl_gl.h)
 find_package(OpenCL REQUIRED)
+find_package(nlohmann_json 3.2.0 REQUIRED)
 # Source folders
 get_filename_component(FUNLIB_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
 
 # Source files (now in src/)
 set(SOURCE_FILES
+    ${FUNLIB_SOURCE_DIR}/source/weight_loader.cpp
     ${FUNLIB_SOURCE_DIR}/source/sycl_handler.cpp
     ${FUNLIB_SOURCE_DIR}/source/tensor.cpp
     ${FUNLIB_SOURCE_DIR}/source/tensor_operations.cpp
@@ -31,6 +33,7 @@ set(SOURCE_FILES
 
 # Header files (now in include/funlib/)
 set(HEADER_FILES
+    ${FUNLIB_SOURCE_DIR}/include/funlib/weights/weight_loader.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/sycl/sycl_handler.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/Tensor/tensor.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/Tensor/tensor_operations.hpp
@@ -50,6 +53,7 @@ target_compile_options(funlib PUBLIC -fsycl -fsycl-targets=${FUNLIB_SYCL_TARGETS
 target_link_options(funlib PUBLIC -fsycl -fsycl-targets=${FUNLIB_SYCL_TARGETS})
 # Link OpenCL
 target_link_libraries(funlib PUBLIC OpenCL::OpenCL GL)
+target_link_libraries(funlib PRIVATE nlohmann_json::nlohmann_json)
 # CRITICAL: Set up include directories
 # During development: allows #include <funlib/Tensor/tensor.hpp> to work
 # After install: users can #include <funlib/Tensor/tensor.hpp>

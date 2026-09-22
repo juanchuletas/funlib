@@ -165,8 +165,8 @@ int main() {
   projectedV.reshape({batch_size, token_count, head_count, head_size});
 
   flib::Tensor<float> joined_output =
-      flib::operations::scaled_dot_product_attention(
-          projectedQ, projectedK, projectedV, head_count, Q);
+      flib::operations::scaled_dot_product_attention(projectedQ, projectedK,
+                                                     projectedV, head_count, Q);
   flib::Tensor<float> output =
       flib::tensor_operations::gemm(joined_output, Wo, Q);
 

@@ -87,8 +87,8 @@ void benchmark(const SoftmaxShape &shape, sycl::queue Q) {
 
 int main() {
   // flib::sycl_handler::register_queue("cuda", flib::device::GPU,
-  //                                    flib::vendor::NVIDIA, flib::backend::CUDA,
-  //                                    true);
+  //                                    flib::vendor::NVIDIA,
+  //                                    flib::backend::CUDA, true);
   // sycl::queue Q = flib::sycl_handler::get_queue("cuda");
   // flib::sycl_handler::get_device_info("cuda");
   flib::sycl_handler::register_queue("intel", flib::device::GPU,
