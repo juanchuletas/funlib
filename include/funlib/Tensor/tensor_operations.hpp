@@ -42,6 +42,10 @@ public:
   static Tensor<T> permute(const Tensor<T> &input,
                            const std::vector<std::size_t> &order, sycl::queue Q,
                            sycl::event *kernel_event = nullptr);
+  template <typename T>
+  static Tensor<T> concatenate(const Tensor<T> &left, const Tensor<T> &right,
+                               std::size_t axis, sycl::queue Q,
+                               sycl::event *kernel_event = nullptr);
 
   // dot product of two vectors or two one dimensional sets
   template <typename T>
