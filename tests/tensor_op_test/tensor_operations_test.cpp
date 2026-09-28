@@ -362,7 +362,7 @@ bool checkBatchedGemm(sycl::queue Q) {
   }
 
   flib::Tensor<float> hostC =
-      flib::tensor_operations::gemm_batched(hostA, hostB, Q, false, true);
+      flib::tensor_operations::gemm_batched(hostA, hostB.transpose(), Q);
   const std::vector<std::size_t> expected_shape{2, 3, 2, 5};
   if (hostC.getShape() != expected_shape) {
     std::cerr << "Host batched GEMM produced the wrong shape" << std::endl;
@@ -382,7 +382,7 @@ bool checkBatchedGemm(sycl::queue Q) {
   deviceA.copy_from(dataA.data(), Q).wait();
   deviceB.copy_from(dataB.data(), Q).wait();
   flib::Tensor<float> deviceC =
-      flib::tensor_operations::gemm_batched(deviceA, deviceB, Q, false, true);
+      flib::tensor_operations::gemm_batched(deviceA, deviceB.transpose(), Q);
   std::vector<float> actual = deviceC.to_host(Q);
   if (deviceC.getShape() != expected_shape) {
     std::cerr << "Device batched GEMM produced the wrong shape" << std::endl;

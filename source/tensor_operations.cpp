@@ -1,6 +1,7 @@
 
 #include <array>
 #include <funlib/Tensor/tensor_operations.hpp>
+#include <funlib/detail/tensor_traits.hpp>
 #include <funlib/sycl/sycl_handler.hpp>
 
 namespace flib {
@@ -770,7 +771,9 @@ T tensor_operations::reduction(const Tensor<T> &A, sycl::queue Q) {
 
   return result;
 }
+
 // Explicit instantiations (VERY IMPORTANT)
+
 template Tensor<double> tensor_operations::gemm(const Tensor<double> &,
                                                 const Tensor<double> &,
                                                 sycl::queue, sycl::event *);
