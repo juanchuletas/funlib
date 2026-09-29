@@ -412,10 +412,11 @@ sycl::event submit_buffer(sycl::buffer<T, 1> &buffA, sycl::buffer<T, 1> &buffB,
 }
 
 template <typename T>
-Tensor<T> tensor_operations::gemm_batched(const Tensor<T> &A,
-                                          const Tensor<T> &B, sycl::queue Q,
-                                          bool transpose_A, bool transpose_B,
-                                          sycl::event *kernel_event) {
+Tensor<T> tensor_operations::gemm_batched_impl(const Tensor<T> &A,
+                                               const Tensor<T> &B,
+                                               sycl::queue Q, bool transpose_A,
+                                               bool transpose_B,
+                                               sycl::event *kernel_event) {
   if (A.getRank() < 2 || B.getRank() < 2) {
     throw std::invalid_argument(
         "Batched GEMM tensors must have at least two dimensions");
@@ -500,17 +501,16 @@ Tensor<T> tensor_operations::gemm_batched(const Tensor<T> &A,
   }
   return C;
 }
-
-template Tensor<double> tensor_operations::gemm_batched(const Tensor<double> &,
-                                                        const Tensor<double> &,
-                                                        sycl::queue, bool, bool,
-                                                        sycl::event *);
-template Tensor<float> tensor_operations::gemm_batched(const Tensor<float> &,
-                                                       const Tensor<float> &,
-                                                       sycl::queue, bool, bool,
-                                                       sycl::event *);
-template Tensor<int> tensor_operations::gemm_batched(const Tensor<int> &,
-                                                     const Tensor<int> &,
-                                                     sycl::queue, bool, bool,
-                                                     sycl::event *);
+template Tensor<double>
+tensor_operations::gemm_batched_impl(const Tensor<double> &,
+                                     const Tensor<double> &, sycl::queue, bool,
+                                     bool, sycl::event *);
+template Tensor<float>
+tensor_operations::gemm_batched_impl(const Tensor<float> &,
+                                     const Tensor<float> &, sycl::queue, bool,
+                                     bool, sycl::event *);
+template Tensor<int> tensor_operations::gemm_batched_impl(const Tensor<int> &,
+                                                          const Tensor<int> &,
+                                                          sycl::queue, bool,
+                                                          bool, sycl::event *);
 } // namespace flib

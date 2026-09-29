@@ -77,7 +77,7 @@ AttentionMeasurements measureAttention(const flib::Tensor<float> &input,
 
     start = Clock::now();
     flib::Tensor<float> scores = flib::tensor_operations::gemm_batched(
-        query_heads, key_heads, queue, false, true);
+        query_heads, key_heads.transpose(), queue);
     result.score_gemm = milliseconds(start, Clock::now());
 
     start = Clock::now();

@@ -133,8 +133,8 @@ int main(int argc, char **argv) {
     auto query_heads = flib::operations::split_heads(query, queue);
     auto key_heads = flib::operations::split_heads(key, queue);
     auto value_heads = flib::operations::split_heads(value, queue);
-    auto scores = flib::tensor_operations::gemm_batched(query_heads, key_heads,
-                                                        queue, false, true);
+    auto scores = flib::tensor_operations::gemm_batched(
+        query_heads, key_heads.transpose(), queue);
     const std::vector<std::size_t> score_shape{batch_size, head_count,
                                                query_tokens, kv_tokens};
     if (scores.getShape() != score_shape) {

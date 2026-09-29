@@ -85,12 +85,12 @@ KernelMeasurements measureKernels(const flib::Tensor<float> &input,
       flib::operations::split_heads(value, queue, &value_layout_event);
 
   flib::Tensor<float> scores = flib::tensor_operations::gemm_batched(
-      query_heads, key_heads, queue, false, true, &score_event);
+      query_heads, key_heads.transpose(), queue, &score_event);
   flib::Tensor<float> probabilities = flib::operations::scaled_softmax(
       scores, 1.0f / std::sqrt(static_cast<float>(shape.head_size)), queue,
       &scaled_softmax_event);
   flib::Tensor<float> head_output = flib::tensor_operations::gemm_batched(
-      probabilities, value_heads, queue, false, false, &value_gemm_event);
+      probabilities, value_heads, queue, &value_gemm_event);
   flib::Tensor<float> joined_output =
       flib::operations::join_heads(head_output, queue, &join_event);
   joined_output.reshape({shape.batch_size, shape.token_count, model_size});

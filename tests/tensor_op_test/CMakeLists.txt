@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 set(FUNLIB_SYCL_TARGETS spir64,nvptx64-nvidia-cuda)
 # Add the static library
-set(FUNLIB_DIR ${CMAKE_SOURCE_DIR}/../install)
+set(FUNLIB_DIR ${CMAKE_SOURCE_DIR}/../../install)
 add_library(funlib STATIC IMPORTED GLOBAL)
 set_target_properties(funlib PROPERTIES
     IMPORTED_LOCATION ${FUNLIB_DIR}/lib/libfunlib.a

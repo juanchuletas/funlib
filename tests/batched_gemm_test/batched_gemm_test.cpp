@@ -81,6 +81,23 @@ bool compareResult(const std::string &name, const flib::Tensor<float> &result,
   return true;
 }
 
+flib::Tensor<float> runBatchedGemm(const flib::Tensor<float> &A,
+                                   const flib::Tensor<float> &B,
+                                   bool transpose_A, bool transpose_B,
+                                   sycl::queue Q) {
+  if (transpose_A && transpose_B) {
+    return flib::tensor_operations::gemm_batched(A.transpose(), B.transpose(),
+                                                 Q);
+  }
+  if (transpose_A) {
+    return flib::tensor_operations::gemm_batched(A.transpose(), B, Q);
+  }
+  if (transpose_B) {
+    return flib::tensor_operations::gemm_batched(A, B.transpose(), Q);
+  }
+  return flib::tensor_operations::gemm_batched(A, B, Q);
+}
+
 bool checkCase(const std::string &name, const std::vector<std::size_t> &shapeA,
                const std::vector<std::size_t> &shapeB, bool transpose_A,
                bool transpose_B, sycl::queue Q) {
@@ -91,8 +108,8 @@ bool checkCase(const std::string &name, const std::vector<std::size_t> &shapeA,
   ReferenceResult expected =
       referenceBatchedGemm(hostA, hostB, transpose_A, transpose_B);
 
-  flib::Tensor<float> hostC = flib::tensor_operations::gemm_batched(
-      hostA, hostB, Q, transpose_A, transpose_B);
+  flib::Tensor<float> hostC =
+      runBatchedGemm(hostA, hostB, transpose_A, transpose_B, Q);
   if (!compareResult(name + " host", hostC, expected, Q)) {
     return false;
   }
@@ -103,8 +120,8 @@ bool checkCase(const std::string &name, const std::vector<std::size_t> &shapeA,
   flib::Tensor<float> deviceB(shapeB, Q);
   deviceA.copy_from(dataA.data(), Q).wait();
   deviceB.copy_from(dataB.data(), Q).wait();
-  flib::Tensor<float> deviceC = flib::tensor_operations::gemm_batched(
-      deviceA, deviceB, Q, transpose_A, transpose_B);
+  flib::Tensor<float> deviceC =
+      runBatchedGemm(deviceA, deviceB, transpose_A, transpose_B, Q);
   if (!compareResult(name + " device", deviceC, expected, Q)) {
     return false;
   }

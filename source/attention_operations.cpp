@@ -244,7 +244,7 @@ Tensor<T> scaled_dot_product_attention(const Tensor<T> &query,
   Tensor<T> key_heads = split_heads(key, Q);
   Tensor<T> value_heads = split_heads(value, Q);
   Tensor<T> scores =
-      tensor_operations::gemm_batched(query_heads, key_heads, Q, false, true);
+      tensor_operations::gemm_batched(query_heads, key_heads.transpose(), Q);
   T scale =
       T(1) / static_cast<T>(std::sqrt(static_cast<double>(query_shape[3])));
   Tensor<T> probabilities = scaled_softmax(scores, scale, Q);
