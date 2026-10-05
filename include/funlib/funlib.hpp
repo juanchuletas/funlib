@@ -5,6 +5,7 @@
 #include <funlib/Tensor/tensor.hpp>
 #include <funlib/Tensor/tensor_operations.hpp>
 #include <funlib/operations/attention/attention_operations.hpp>
+#include <funlib/operations/convolution/convolution.hpp>
 #include <funlib/operations/elementwise_operations/elementwise_operations.hpp>
 #include <funlib/operations/normalization/normalization.hpp>
 #include <funlib/operations/softmax/softmax.hpp>
