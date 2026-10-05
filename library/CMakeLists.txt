@@ -27,6 +27,7 @@ set(SOURCE_FILES
     ${FUNLIB_SOURCE_DIR}/source/attention_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/elementwise_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/normalization.cpp
+    ${FUNLIB_SOURCE_DIR}/source/convolution.cpp
     ${FUNLIB_SOURCE_DIR}/source/softmax.cpp
     ${FUNLIB_SOURCE_DIR}/source/linal.cpp
    
@@ -42,6 +43,7 @@ set(HEADER_FILES
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/attention/attention_operations.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/elementwise_operations/elementwise_operations.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/normalization/normalization.hpp
+    ${FUNLIB_SOURCE_DIR}/include/funlib/operations/convolution/convolution.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/softmax/softmax.hpp
   
 )
