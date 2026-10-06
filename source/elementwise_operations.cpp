@@ -272,6 +272,139 @@ Tensor<T> gelu(const Tensor<T> &input, sycl::queue Q,
 }
 
 template <typename T>
+Tensor<T> silu(const Tensor<T> &input, sycl::queue Q,
+               sycl::event *kernel_event) {
+  const std::vector<std::size_t> &shape = input.getShape();
+  if (shape.empty()) {
+    throw std::invalid_argument(
+        "SiLU requires a tensor with at least one dimension");
+  }
+
+  std::size_t size = input.getSize();
+  if (input.is_device()) {
+    if (!input.is_accessible_from(Q)) {
+      throw std::invalid_argument("SiLU queue cannot access the input tensor");
+    }
+    Tensor<T> output(shape, Q);
+    if (size == 0) {
+      return output;
+    }
+
+    const T *input_data = input.device_data();
+    T *output_data = output.device_data();
+    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+      cgh.parallel_for(sycl::range<1>{size}, [=](sycl::item<1> item) {
+        std::size_t index = item.get_id(0);
+        T value = input_data[index];
+        output_data[index] = value / (T(1) + sycl::exp(-value));
+      });
+    });
+    if (kernel_event != nullptr) {
+      *kernel_event = event;
+    }
+    event.wait();
+    return output;
+  }
+
+  Tensor<T> output(shape);
+  if (size == 0) {
+    return output;
+  }
+  {
+    sycl::buffer<T, 1> input_buffer = input.to_sycl_buffer();
+    sycl::buffer<T, 1> output_buffer = output.to_sycl_buffer();
+    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+      auto input_accessor =
+          input_buffer.template get_access<sycl::access::mode::read>(cgh);
+      auto output_accessor =
+          output_buffer.template get_access<sycl::access::mode::write>(cgh);
+      cgh.parallel_for(sycl::range<1>{size}, [=](sycl::item<1> item) {
+        std::size_t index = item.get_id(0);
+        T value = input_accessor[index];
+        output_accessor[index] = value / (T(1) + sycl::exp(-value));
+      });
+    });
+    if (kernel_event != nullptr) {
+      *kernel_event = event;
+    }
+  }
+  return output;
+}
+
+template <typename T>
+Tensor<T> shifted_exp_column(const Tensor<T> &input, std::size_t column,
+                             T shift, sycl::queue Q,
+                             sycl::event *kernel_event) {
+  if (input.getRank() != 2) {
+    throw std::invalid_argument(
+        "Shifted exponential column requires input shape [N, D]");
+  }
+  const std::vector<std::size_t> &input_shape = input.getShape();
+  std::size_t row_count = input_shape[0];
+  std::size_t column_count = input_shape[1];
+  if (column_count == 0) {
+    throw std::invalid_argument(
+        "Shifted exponential column requires a positive column count");
+  }
+  if (column >= column_count) {
+    throw std::invalid_argument(
+        "Shifted exponential column index is outside the input tensor");
+  }
+
+  std::vector<std::size_t> output_shape{row_count};
+  if (input.is_device()) {
+    if (!input.is_accessible_from(Q)) {
+      throw std::invalid_argument(
+          "Shifted exponential column queue cannot access the input tensor");
+    }
+    Tensor<T> output(output_shape, Q);
+    if (row_count == 0) {
+      return output;
+    }
+
+    const T *input_data = input.device_data();
+    T *output_data = output.device_data();
+    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+      // Each work item reads one row and returns the requested column.
+      cgh.parallel_for(sycl::range<1>{row_count}, [=](sycl::item<1> item) {
+        std::size_t row = item.get_id(0);
+        output_data[row] =
+            sycl::exp(input_data[row * column_count + column] + shift);
+      });
+    });
+    if (kernel_event != nullptr) {
+      *kernel_event = event;
+    }
+    event.wait();
+    return output;
+  }
+
+  Tensor<T> output(output_shape);
+  if (row_count == 0) {
+    return output;
+  }
+  {
+    sycl::buffer<T, 1> input_buffer = input.to_sycl_buffer();
+    sycl::buffer<T, 1> output_buffer = output.to_sycl_buffer();
+    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+      auto input_accessor =
+          input_buffer.template get_access<sycl::access::mode::read>(cgh);
+      auto output_accessor =
+          output_buffer.template get_access<sycl::access::mode::write>(cgh);
+      cgh.parallel_for(sycl::range<1>{row_count}, [=](sycl::item<1> item) {
+        std::size_t row = item.get_id(0);
+        output_accessor[row] =
+            sycl::exp(input_accessor[row * column_count + column] + shift);
+      });
+    });
+    if (kernel_event != nullptr) {
+      *kernel_event = event;
+    }
+  }
+  return output;
+}
+
+template <typename T>
 Tensor<T> geglu(const Tensor<T> &input, sycl::queue Q,
                 sycl::event *kernel_event) {
   const std::vector<std::size_t> &input_shape = input.getShape();
@@ -372,6 +505,13 @@ template Tensor<int> add_bias(const Tensor<int> &, const Tensor<int> &,
 template Tensor<double> gelu(const Tensor<double> &, sycl::queue,
                              sycl::event *);
 template Tensor<float> gelu(const Tensor<float> &, sycl::queue, sycl::event *);
+template Tensor<double> silu(const Tensor<double> &, sycl::queue,
+                             sycl::event *);
+template Tensor<float> silu(const Tensor<float> &, sycl::queue, sycl::event *);
+template Tensor<double> shifted_exp_column(const Tensor<double> &, std::size_t,
+                                           double, sycl::queue, sycl::event *);
+template Tensor<float> shifted_exp_column(const Tensor<float> &, std::size_t,
+                                          float, sycl::queue, sycl::event *);
 template Tensor<double> geglu(const Tensor<double> &, sycl::queue,
                               sycl::event *);
 template Tensor<float> geglu(const Tensor<float> &, sycl::queue, sycl::event *);

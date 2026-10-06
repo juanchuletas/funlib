@@ -31,6 +31,10 @@ float geluReference(float value) {
   return 0.5f * value * (1.0f + std::erf(value * 0.70710678118654752440f));
 }
 
+float siluReference(float value) {
+  return value / (1.0f + std::exp(-value));
+}
+
 bool checkHost(sycl::queue Q) {
   flib::Tensor<float> left({2, 2, 3});
   flib::Tensor<float> right({2, 2, 3});
@@ -39,6 +43,7 @@ bool checkHost(sycl::queue Q) {
   std::vector<float> added(left.getSize());
   std::vector<float> biased(left.getSize());
   std::vector<float> activated(left.getSize());
+  std::vector<float> silu_activated(left.getSize());
   std::vector<float> gated(left.getSize());
   for (std::size_t feature = 0; feature < bias.getSize(); feature++) {
     bias[feature] = static_cast<float>(feature + 1) / 4.0f;
@@ -49,6 +54,7 @@ bool checkHost(sycl::queue Q) {
     added[i] = left[i] + right[i];
     biased[i] = left[i] + bias[i % 3];
     activated[i] = geluReference(left[i]);
+    silu_activated[i] = siluReference(left[i]);
     std::size_t row = i / 3;
     std::size_t column = i % 3;
     float value = left[i];
@@ -61,6 +67,7 @@ bool checkHost(sycl::queue Q) {
   flib::Tensor<float> add_output = flib::operations::add(left, right, Q);
   flib::Tensor<float> bias_output = flib::operations::add_bias(left, bias, Q);
   flib::Tensor<float> gelu_output = flib::operations::gelu(left, Q);
+  flib::Tensor<float> silu_output = flib::operations::silu(left, Q);
   flib::Tensor<float> geglu_output = flib::operations::geglu(packed, Q);
   if (bias_output.getShape() != left.getShape() ||
       geglu_output.getShape() != std::vector<std::size_t>{2, 2, 3}) {
@@ -71,6 +78,7 @@ bool checkHost(sycl::queue Q) {
   return compareValues("Host add", add_output, added, Q) &&
          compareValues("Host add bias", bias_output, biased, Q) &&
          compareValues("Host GELU", gelu_output, activated, Q) &&
+         compareValues("Host SiLU", silu_output, silu_activated, Q) &&
          compareValues("Host GEGLU", geglu_output, gated, Q);
 }
 
@@ -80,6 +88,7 @@ bool checkDevice(sycl::queue Q) {
   std::vector<float> added(24);
   std::vector<float> biased(24);
   std::vector<float> activated(24);
+  std::vector<float> silu_activated(24);
   std::vector<float> bias_values{0.25f, -0.5f, 0.75f, -1.0f};
   std::vector<float> packed_values(48);
   std::vector<float> gated(24);
@@ -89,6 +98,7 @@ bool checkDevice(sycl::queue Q) {
     added[i] = left_values[i] + right_values[i];
     biased[i] = left_values[i] + bias_values[i % 4];
     activated[i] = geluReference(left_values[i]);
+    silu_activated[i] = siluReference(left_values[i]);
     std::size_t row = i / 4;
     std::size_t column = i % 4;
     packed_values[row * 8 + column] = left_values[i];
@@ -107,6 +117,7 @@ bool checkDevice(sycl::queue Q) {
   sycl::event add_event;
   sycl::event bias_event;
   sycl::event gelu_event;
+  sycl::event silu_event;
   sycl::event geglu_event;
   flib::Tensor<float> add_output =
       flib::operations::add(left, right, Q, &add_event);
@@ -114,11 +125,14 @@ bool checkDevice(sycl::queue Q) {
       flib::operations::add_bias(left, bias, Q, &bias_event);
   flib::Tensor<float> gelu_output =
       flib::operations::gelu(left, Q, &gelu_event);
+  flib::Tensor<float> silu_output =
+      flib::operations::silu(left, Q, &silu_event);
   flib::Tensor<float> geglu_output =
       flib::operations::geglu(packed, Q, &geglu_event);
   add_event.wait();
   bias_event.wait();
   gelu_event.wait();
+  silu_event.wait();
   geglu_event.wait();
   if (bias_output.getShape() != left.getShape() ||
       geglu_output.getShape() != std::vector<std::size_t>{2, 3, 4}) {
@@ -129,7 +143,37 @@ bool checkDevice(sycl::queue Q) {
   return compareValues("Device add", add_output, added, Q) &&
          compareValues("Device add bias", bias_output, biased, Q) &&
          compareValues("Device GELU", gelu_output, activated, Q) &&
+         compareValues("Device SiLU", silu_output, silu_activated, Q) &&
          compareValues("Device GEGLU", geglu_output, gated, Q);
+}
+
+bool checkShiftedExpColumn(sycl::queue Q) {
+  std::vector<float> input_values{
+      1.0f, 10.0f, 20.0f, 30.0f,
+      2.0f, 11.0f, 21.0f, 31.0f,
+      3.0f, 12.0f, 22.0f, 32.0f};
+  const std::vector<float> expected{std::exp(0.0f), std::exp(1.0f),
+                                    std::exp(2.0f)};
+
+  flib::Tensor<float> host_input({3, 4}, input_values.data());
+  flib::Tensor<float> host_output =
+      flib::operations::shifted_exp_column(host_input, 0, -1.0f, Q);
+  if (host_output.getShape() != std::vector<std::size_t>{3} ||
+      !compareValues("Host shifted exponential column", host_output, expected,
+                     Q)) {
+    return false;
+  }
+
+  flib::Tensor<float> device_input({3, 4}, Q);
+  device_input.copy_from(input_values.data(), Q).wait();
+  sycl::event kernel_event;
+  flib::Tensor<float> device_output =
+      flib::operations::shifted_exp_column(device_input, 0, -1.0f, Q,
+                                           &kernel_event);
+  kernel_event.wait();
+  return device_output.getShape() == std::vector<std::size_t>{3} &&
+         compareValues("Device shifted exponential column", device_output,
+                       expected, Q);
 }
 
 bool checkInvalidShape(sycl::queue Q) {
@@ -158,6 +202,15 @@ bool checkInvalidShape(sycl::queue Q) {
     return false;
   } catch (const std::invalid_argument &) {
   }
+
+  try {
+    flib::Tensor<float> input({2, 3});
+    flib::operations::shifted_exp_column(input, 3, -1.0f, Q);
+    std::cerr << "Shifted exponential column accepted an invalid column"
+              << std::endl;
+    return false;
+  } catch (const std::invalid_argument &) {
+  }
   return true;
 }
 
@@ -168,7 +221,8 @@ int main() {
   sycl::queue Q = flib::sycl_handler::get_queue("cuda");
   flib::sycl_handler::get_device_info("cuda");
 
-  if (!checkHost(Q) || !checkDevice(Q) || !checkInvalidShape(Q)) {
+  if (!checkHost(Q) || !checkDevice(Q) || !checkShiftedExpColumn(Q) ||
+      !checkInvalidShape(Q)) {
     return 1;
   }
   std::cout << "All elementwise operation tests passed" << std::endl;
