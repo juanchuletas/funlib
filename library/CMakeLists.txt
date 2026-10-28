@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 # SYCL Configuration
 message("DPCPP compiler path: ${CMAKE_CXX_COMPILER}")
 # Add funlib
-set(FUNLIB_SYCL_TARGETS spir64,nvptx64-nvidia-cuda)
+set(FUNLIB_SYCL_TARGETS spir64,nvidia_gpu_sm_89)
 # Find OpenCL package (required for cl_gl.h)
 find_package(OpenCL REQUIRED)
 find_package(nlohmann_json 3.2.0 REQUIRED)
@@ -23,12 +23,14 @@ set(SOURCE_FILES
     ${FUNLIB_SOURCE_DIR}/source/tensor.cpp
     ${FUNLIB_SOURCE_DIR}/source/tensor_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/tensor_concatenate.cpp
+    ${FUNLIB_SOURCE_DIR}/source/tensor_slice.cpp
     ${FUNLIB_SOURCE_DIR}/source/batched_gemm.cpp
     ${FUNLIB_SOURCE_DIR}/source/attention_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/elementwise_operations.cpp
     ${FUNLIB_SOURCE_DIR}/source/normalization.cpp
     ${FUNLIB_SOURCE_DIR}/source/convolution.cpp
     ${FUNLIB_SOURCE_DIR}/source/triplane_sampling.cpp
+    ${FUNLIB_SOURCE_DIR}/source/interpolation.cpp
     ${FUNLIB_SOURCE_DIR}/source/softmax.cpp
     ${FUNLIB_SOURCE_DIR}/source/linal.cpp
    
@@ -45,6 +47,7 @@ set(HEADER_FILES
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/elementwise_operations/elementwise_operations.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/normalization/normalization.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/convolution/convolution.hpp
+    ${FUNLIB_SOURCE_DIR}/include/funlib/operations/sampling/interpolation.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/sampling/triplane_sampling.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/softmax/softmax.hpp
   

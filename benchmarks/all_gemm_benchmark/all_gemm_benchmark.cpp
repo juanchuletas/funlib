@@ -179,11 +179,11 @@ void benchmarkShape(std::size_t M, std::size_t K, std::size_t N,
 }
 
 int main() {
-  flib::sycl_handler::register_queue("intel", flib::device::GPU,
-                                     flib::vendor::INTEL, flib::backend::OPENCL,
+  flib::sycl_handler::register_queue("cuda", flib::device::GPU,
+                                     flib::vendor::NVIDIA, flib::backend::CUDA,
                                      true);
-  sycl::queue Q = flib::sycl_handler::get_queue("intel");
-  flib::sycl_handler::get_device_info("intel");
+  sycl::queue Q = flib::sycl_handler::get_queue("cuda");
+  flib::sycl_handler::get_device_info("cuda");
 
   std::cout << std::fixed << std::setprecision(3);
   std::cout << "    M x    K x    N" << std::setw(28) << "Method"
