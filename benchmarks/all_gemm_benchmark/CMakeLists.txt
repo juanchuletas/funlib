@@ -4,7 +4,7 @@ project(AllGemmBenchmark)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
-set(FUNLIB_SYCL_TARGETS spir64,nvptx64-nvidia-cuda)
+set(FUNLIB_SYCL_TARGETS spir64,nvidia_gpu_sm_89)
 
 set(FUNLIB_DIR ${CMAKE_SOURCE_DIR}/../../install)
 add_library(funlib STATIC IMPORTED GLOBAL)
