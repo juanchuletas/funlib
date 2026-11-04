@@ -7,6 +7,7 @@ namespace flib::graphics::marching_cubes::detail {
         const std::size_t vertex_count = triangle_count * 3;
         return {
             flib::ftensor({vertex_count, 3}, queue),
+            flib::ftensor({vertex_count, 3}, queue),
             flib::ftensor({vertex_count, 3}, queue)};
     }
 

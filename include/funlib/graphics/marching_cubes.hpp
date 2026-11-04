@@ -19,6 +19,7 @@ namespace flib{
 
                 flib::ftensor positions; 
                 flib::ftensor normals; 
+                flib::ftensor colors; 
 
             };
 

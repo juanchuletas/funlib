@@ -1,6 +1,7 @@
 #if !defined(_TENSOR_HPP_)
 #define _TENSOR_HPP_
 #include <funlib/detail/tensor_traits.hpp>
+#include <cstdint>
 #include <initializer_list>
 #include <iomanip>
 #include <iostream>
