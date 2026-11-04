@@ -95,11 +95,10 @@ public:
   detail::TransposedTensorView<T> transpose() const && = delete;
 };
 // Typedefs
-using tensor       = Tensor<double>;
-using ftensor      = Tensor<float>;
-using itensor      = Tensor<int>;
-using ui8tensor    = Tensor<uint8_t>;
-using ui32tensor   = Tensor<uint32_t>;
+using tensor = Tensor<double>;
+using ftensor = Tensor<float>;
+using itensor = Tensor<int>;
+
 }; // namespace flib
 
 #endif // _SET_HPP_
