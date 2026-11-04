@@ -33,6 +33,11 @@ set(SOURCE_FILES
     ${FUNLIB_SOURCE_DIR}/source/interpolation.cpp
     ${FUNLIB_SOURCE_DIR}/source/softmax.cpp
     ${FUNLIB_SOURCE_DIR}/source/linal.cpp
+    ${FUNLIB_SOURCE_DIR}/source/marching_cubes.cpp
+    ${FUNLIB_SOURCE_DIR}/source/graphics/classify_cells.cpp
+    ${FUNLIB_SOURCE_DIR}/source/graphics/exclusive_scan.cpp
+    ${FUNLIB_SOURCE_DIR}/source/graphics/generate_triangles.cpp
+    ${FUNLIB_SOURCE_DIR}/source/graphics/allocate_mesh.cpp
    
 )
 
@@ -50,6 +55,8 @@ set(HEADER_FILES
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/sampling/interpolation.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/sampling/triplane_sampling.hpp
     ${FUNLIB_SOURCE_DIR}/include/funlib/operations/softmax/softmax.hpp
+    ${FUNLIB_SOURCE_DIR}/include/funlib/graphics/marching_cubes.hpp
+    ${FUNLIB_SOURCE_DIR}/include/funlib/graphics/mc_tables.hpp
   
 )
 
