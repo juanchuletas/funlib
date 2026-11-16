@@ -16,18 +16,18 @@ float readPlane(const std::vector<float> &triplane, std::size_t plane,
       y >= static_cast<std::ptrdiff_t>(height)) {
     return 0.0f;
   }
-  std::size_t index =
-      ((plane * channel_count + channel) * height +
-       static_cast<std::size_t>(y)) *
-          width +
-      static_cast<std::size_t>(x);
+  std::size_t index = ((plane * channel_count + channel) * height +
+                       static_cast<std::size_t>(y)) *
+                          width +
+                      static_cast<std::size_t>(x);
   return triplane[index];
 }
 
-std::vector<float> triplaneReference(
-    const std::vector<float> &triplane,
-    const std::vector<float> &positions, std::size_t point_count,
-    std::size_t channel_count, std::size_t height, std::size_t width) {
+std::vector<float> triplaneReference(const std::vector<float> &triplane,
+                                     const std::vector<float> &positions,
+                                     std::size_t point_count,
+                                     std::size_t channel_count,
+                                     std::size_t height, std::size_t width) {
   std::size_t features_per_point = 3 * channel_count;
   std::vector<float> output(point_count * features_per_point);
   for (std::size_t point = 0; point < point_count; point++) {
@@ -83,12 +83,11 @@ int main() {
     constexpr std::size_t height = 2;
     constexpr std::size_t width = 2;
     const std::vector<float> triplane_values{
-        1,   2,   3,   4,   5,   6,   7,   8,
-        10,  20,  30,  40,  50,  60,  70,  80,
-        100, 200, 300, 400, 500, 600, 700, 800};
-    const std::vector<float> position_values{
-        0.0f, 0.0f, 0.0f, -0.5f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.5f, 2.0f, 2.0f, 2.0f};
+        1,  2,  3,  4,  5,   6,   7,   8,   10,  20,  30,  40,
+        50, 60, 70, 80, 100, 200, 300, 400, 500, 600, 700, 800};
+    const std::vector<float> position_values{0.0f, 0.0f, 0.0f, -0.5f,
+                                             0.5f, 0.0f, 0.5f, -0.5f,
+                                             0.5f, 2.0f, 2.0f, 2.0f};
     const std::vector<float> expected =
         triplaneReference(triplane_values, position_values, point_count,
                           channel_count, height, width);
@@ -112,7 +111,8 @@ int main() {
     float max_difference = 0.0f;
     for (std::size_t index = 0; index < actual.size(); index++) {
       if (!std::isfinite(actual[index])) {
-        throw std::runtime_error("Triplane sampler returned a non-finite value");
+        throw std::runtime_error(
+            "Triplane sampler returned a non-finite value");
       }
       max_difference =
           std::max(max_difference, std::abs(actual[index] - expected[index]));

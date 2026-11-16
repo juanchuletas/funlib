@@ -45,10 +45,10 @@ bool check_bicubic_reference(sycl::queue Q) {
   // This reference uses bicubic interpolation with align_corners=false.
   const std::vector<float> input_values{1.0f, 2.0f, 3.0f, 4.0f};
   const std::vector<float> expected{
-      0.68359375f, 1.015625f,  1.5625f,     1.89453125f,
-      1.34765625f, 1.6796875f, 2.2265625f,  2.55859375f,
-      2.44140625f, 2.7734375f, 3.3203125f,  3.65234375f,
-      3.10546875f, 3.4375f,    3.984375f,   4.31640625f};
+      0.68359375f, 1.015625f,  1.5625f,    1.89453125f,
+      1.34765625f, 1.6796875f, 2.2265625f, 2.55859375f,
+      2.44140625f, 2.7734375f, 3.3203125f, 3.65234375f,
+      3.10546875f, 3.4375f,    3.984375f,  4.31640625f};
 
   flib::ftensor input({1, 1, 2, 2}, Q);
   input.copy_from(input_values.data(), Q).wait();
@@ -76,8 +76,7 @@ bool check_position_grid_shape(sycl::queue Q) {
   std::vector<float> result = output.to_host(Q);
   for (float value : result) {
     if (std::fabs(value - 2.0f) > 1e-5f) {
-      std::cerr << "Bicubic interpolation changed a constant grid"
-                << std::endl;
+      std::cerr << "Bicubic interpolation changed a constant grid" << std::endl;
       return false;
     }
   }
@@ -96,8 +95,7 @@ bool check_invalid_inputs(sycl::queue Q) {
   try {
     flib::ftensor input({2, 2}, Q);
     flib::operations::interpolate_bicubic(input, 4, 4, Q);
-    std::cerr << "Bicubic interpolation accepted an invalid rank"
-              << std::endl;
+    std::cerr << "Bicubic interpolation accepted an invalid rank" << std::endl;
     return false;
   } catch (const std::invalid_argument &) {
   }

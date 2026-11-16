@@ -9,9 +9,8 @@
 namespace flib::operations {
 
 template <typename T>
-Tensor<T> triplane_sample(const Tensor<T> &triplane,
-                          const Tensor<T> &positions, sycl::queue Q,
-                          sycl::event *kernel_event) {
+Tensor<T> triplane_sample(const Tensor<T> &triplane, const Tensor<T> &positions,
+                          sycl::queue Q, sycl::event *kernel_event) {
   // The triplane contains the XY, XZ and YZ feature planes.
   if (triplane.getRank() != 4 || triplane.getShape()[0] != 3) {
     throw std::invalid_argument(
@@ -41,10 +40,10 @@ Tensor<T> triplane_sample(const Tensor<T> &triplane,
     throw std::invalid_argument(
         "Triplane sampler channel and spatial dimensions cannot be zero");
   }
-  if (height > static_cast<std::size_t>(
-                   std::numeric_limits<std::int32_t>::max()) ||
-      width > static_cast<std::size_t>(
-                  std::numeric_limits<std::int32_t>::max())) {
+  if (height >
+          static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()) ||
+      width >
+          static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max())) {
     throw std::invalid_argument(
         "Triplane sampler height and width must fit in int32");
   }
@@ -107,10 +106,8 @@ Tensor<T> triplane_sample(const Tensor<T> &triplane,
       }
 
       // Convert normalized coordinates using align_corners=false.
-      T image_x =
-          ((horizontal + T(1)) * static_cast<T>(width) - T(1)) / T(2);
-      T image_y =
-          ((vertical + T(1)) * static_cast<T>(height) - T(1)) / T(2);
+      T image_x = ((horizontal + T(1)) * static_cast<T>(width) - T(1)) / T(2);
+      T image_y = ((vertical + T(1)) * static_cast<T>(height) - T(1)) / T(2);
       std::int32_t x0 = static_cast<std::int32_t>(sycl::floor(image_x));
       std::int32_t y0 = static_cast<std::int32_t>(sycl::floor(image_y));
       std::int32_t x1 = x0 + 1;
@@ -125,38 +122,34 @@ Tensor<T> triplane_sample(const Tensor<T> &triplane,
       T bottom_right = T(0);
       if (x0 >= 0 && x0 < static_cast<std::int32_t>(width) && y0 >= 0 &&
           y0 < static_cast<std::int32_t>(height)) {
-        std::size_t index =
-            ((plane * channel_count + channel) * height +
-             static_cast<std::size_t>(y0)) *
-                width +
-            static_cast<std::size_t>(x0);
+        std::size_t index = ((plane * channel_count + channel) * height +
+                             static_cast<std::size_t>(y0)) *
+                                width +
+                            static_cast<std::size_t>(x0);
         top_left = triplane_data[index];
       }
       if (x1 >= 0 && x1 < static_cast<std::int32_t>(width) && y0 >= 0 &&
           y0 < static_cast<std::int32_t>(height)) {
-        std::size_t index =
-            ((plane * channel_count + channel) * height +
-             static_cast<std::size_t>(y0)) *
-                width +
-            static_cast<std::size_t>(x1);
+        std::size_t index = ((plane * channel_count + channel) * height +
+                             static_cast<std::size_t>(y0)) *
+                                width +
+                            static_cast<std::size_t>(x1);
         top_right = triplane_data[index];
       }
       if (x0 >= 0 && x0 < static_cast<std::int32_t>(width) && y1 >= 0 &&
           y1 < static_cast<std::int32_t>(height)) {
-        std::size_t index =
-            ((plane * channel_count + channel) * height +
-             static_cast<std::size_t>(y1)) *
-                width +
-            static_cast<std::size_t>(x0);
+        std::size_t index = ((plane * channel_count + channel) * height +
+                             static_cast<std::size_t>(y1)) *
+                                width +
+                            static_cast<std::size_t>(x0);
         bottom_left = triplane_data[index];
       }
       if (x1 >= 0 && x1 < static_cast<std::int32_t>(width) && y1 >= 0 &&
           y1 < static_cast<std::int32_t>(height)) {
-        std::size_t index =
-            ((plane * channel_count + channel) * height +
-             static_cast<std::size_t>(y1)) *
-                width +
-            static_cast<std::size_t>(x1);
+        std::size_t index = ((plane * channel_count + channel) * height +
+                             static_cast<std::size_t>(y1)) *
+                                width +
+                            static_cast<std::size_t>(x1);
         bottom_right = triplane_data[index];
       }
 

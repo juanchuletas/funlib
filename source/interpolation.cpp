@@ -11,8 +11,7 @@ template <typename T> T bicubic_kernel_weight(T distance) {
   T absolute_distance = sycl::fabs(distance);
   T coefficient = T(-0.75);
   if (absolute_distance <= T(1)) {
-    return ((coefficient + T(2)) * absolute_distance -
-            (coefficient + T(3))) *
+    return ((coefficient + T(2)) * absolute_distance - (coefficient + T(3))) *
                absolute_distance * absolute_distance +
            T(1);
   }
@@ -27,8 +26,7 @@ template <typename T> T bicubic_kernel_weight(T distance) {
 }
 
 template <typename T>
-Tensor<T> interpolate_bicubic(const Tensor<T> &input,
-                              std::size_t output_height,
+Tensor<T> interpolate_bicubic(const Tensor<T> &input, std::size_t output_height,
                               std::size_t output_width, sycl::queue Q,
                               sycl::event *kernel_event) {
   if (input.getRank() != 4) {
@@ -57,10 +55,10 @@ Tensor<T> interpolate_bicubic(const Tensor<T> &input,
     throw std::invalid_argument(
         "Bicubic interpolation input dimensions cannot be zero");
   }
-  if (input_height > static_cast<std::size_t>(
-                         std::numeric_limits<std::int32_t>::max()) ||
-      input_width > static_cast<std::size_t>(
-                        std::numeric_limits<std::int32_t>::max())) {
+  if (input_height >
+          static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()) ||
+      input_width >
+          static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max())) {
     throw std::invalid_argument(
         "Bicubic interpolation dimensions must fit in int32");
   }
@@ -87,18 +85,16 @@ Tensor<T> interpolate_bicubic(const Tensor<T> &input,
       std::size_t batch = remaining / channel_count;
 
       // align_corners=false maps output pixel centers to input pixel centers.
-      T source_x =
-          (static_cast<T>(output_x) + T(0.5)) *
-              static_cast<T>(input_width) / static_cast<T>(output_width) -
-          T(0.5);
-      T source_y =
-          (static_cast<T>(output_y) + T(0.5)) *
-              static_cast<T>(input_height) / static_cast<T>(output_height) -
-          T(0.5);
-      std::int32_t base_x =
-          static_cast<std::int32_t>(sycl::floor(source_x));
-      std::int32_t base_y =
-          static_cast<std::int32_t>(sycl::floor(source_y));
+      T source_x = (static_cast<T>(output_x) + T(0.5)) *
+                       static_cast<T>(input_width) /
+                       static_cast<T>(output_width) -
+                   T(0.5);
+      T source_y = (static_cast<T>(output_y) + T(0.5)) *
+                       static_cast<T>(input_height) /
+                       static_cast<T>(output_height) -
+                   T(0.5);
+      std::int32_t base_x = static_cast<std::int32_t>(sycl::floor(source_x));
+      std::int32_t base_y = static_cast<std::int32_t>(sycl::floor(source_y));
       T fraction_x = source_x - static_cast<T>(base_x);
       T fraction_y = source_y - static_cast<T>(base_y);
 
@@ -108,16 +104,16 @@ Tensor<T> interpolate_bicubic(const Tensor<T> &input,
         input_y = sycl::max(
             std::int32_t(0),
             sycl::min(input_y, static_cast<std::int32_t>(input_height) - 1));
-        T weight_y = bicubic_kernel_weight(
-            static_cast<T>(sample_y - 1) - fraction_y);
+        T weight_y =
+            bicubic_kernel_weight(static_cast<T>(sample_y - 1) - fraction_y);
 
         for (std::int32_t sample_x = 0; sample_x < 4; sample_x++) {
           std::int32_t input_x = base_x + sample_x - 1;
           input_x = sycl::max(
               std::int32_t(0),
               sycl::min(input_x, static_cast<std::int32_t>(input_width) - 1));
-          T weight_x = bicubic_kernel_weight(
-              static_cast<T>(sample_x - 1) - fraction_x);
+          T weight_x =
+              bicubic_kernel_weight(static_cast<T>(sample_x - 1) - fraction_x);
           std::size_t input_index =
               ((batch * channel_count + channel) * input_height +
                static_cast<std::size_t>(input_y)) *
@@ -136,9 +132,9 @@ Tensor<T> interpolate_bicubic(const Tensor<T> &input,
   return output;
 }
 
-template Tensor<double> interpolate_bicubic(const Tensor<double> &,
-                                            std::size_t, std::size_t,
-                                            sycl::queue, sycl::event *);
+template Tensor<double> interpolate_bicubic(const Tensor<double> &, std::size_t,
+                                            std::size_t, sycl::queue,
+                                            sycl::event *);
 template Tensor<float> interpolate_bicubic(const Tensor<float> &, std::size_t,
                                            std::size_t, sycl::queue,
                                            sycl::event *);
