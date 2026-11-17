@@ -20,7 +20,8 @@ Tensor<T> tensor_operations::slice(const Tensor<T> &input,
 
   const std::vector<std::size_t> &input_shape = input.getShape();
   if (start > end || end > input_shape[dimension]) {
-    throw std::invalid_argument("Slice range is outside the selected dimension");
+    throw std::invalid_argument(
+        "Slice range is outside the selected dimension");
   }
   if (input.is_device() && !input.is_accessible_from(Q)) {
     throw std::invalid_argument("Slice queue cannot access the input tensor");
@@ -103,14 +104,16 @@ Tensor<T> tensor_operations::slice(const Tensor<T> &input,
   return output;
 }
 
-template Tensor<double>
-tensor_operations::slice(const Tensor<double> &, std::size_t, std::size_t,
-                         std::size_t, sycl::queue, sycl::event *);
-template Tensor<float>
-tensor_operations::slice(const Tensor<float> &, std::size_t, std::size_t,
-                         std::size_t, sycl::queue, sycl::event *);
-template Tensor<int>
-tensor_operations::slice(const Tensor<int> &, std::size_t, std::size_t,
-                         std::size_t, sycl::queue, sycl::event *);
+template Tensor<double> tensor_operations::slice(const Tensor<double> &,
+                                                 std::size_t, std::size_t,
+                                                 std::size_t, sycl::queue,
+                                                 sycl::event *);
+template Tensor<float> tensor_operations::slice(const Tensor<float> &,
+                                                std::size_t, std::size_t,
+                                                std::size_t, sycl::queue,
+                                                sycl::event *);
+template Tensor<int> tensor_operations::slice(const Tensor<int> &, std::size_t,
+                                              std::size_t, std::size_t,
+                                              sycl::queue, sycl::event *);
 
 } // namespace flib

@@ -31,9 +31,7 @@ float geluReference(float value) {
   return 0.5f * value * (1.0f + std::erf(value * 0.70710678118654752440f));
 }
 
-float siluReference(float value) {
-  return value / (1.0f + std::exp(-value));
-}
+float siluReference(float value) { return value / (1.0f + std::exp(-value)); }
 
 bool checkHost(sycl::queue Q) {
   flib::Tensor<float> left({2, 2, 3});
@@ -148,10 +146,8 @@ bool checkDevice(sycl::queue Q) {
 }
 
 bool checkShiftedExpColumn(sycl::queue Q) {
-  std::vector<float> input_values{
-      1.0f, 10.0f, 20.0f, 30.0f,
-      2.0f, 11.0f, 21.0f, 31.0f,
-      3.0f, 12.0f, 22.0f, 32.0f};
+  std::vector<float> input_values{1.0f,  10.0f, 20.0f, 30.0f, 2.0f,  11.0f,
+                                  21.0f, 31.0f, 3.0f,  12.0f, 22.0f, 32.0f};
   const std::vector<float> expected{std::exp(0.0f), std::exp(1.0f),
                                     std::exp(2.0f)};
 
@@ -167,9 +163,8 @@ bool checkShiftedExpColumn(sycl::queue Q) {
   flib::Tensor<float> device_input({3, 4}, Q);
   device_input.copy_from(input_values.data(), Q).wait();
   sycl::event kernel_event;
-  flib::Tensor<float> device_output =
-      flib::operations::shifted_exp_column(device_input, 0, -1.0f, Q,
-                                           &kernel_event);
+  flib::Tensor<float> device_output = flib::operations::shifted_exp_column(
+      device_input, 0, -1.0f, Q, &kernel_event);
   kernel_event.wait();
   return device_output.getShape() == std::vector<std::size_t>{3} &&
          compareValues("Device shifted exponential column", device_output,

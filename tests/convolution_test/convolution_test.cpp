@@ -17,20 +17,19 @@ std::vector<float> convolution2dReference(
     std::size_t input_channels, std::size_t input_height,
     std::size_t input_width, std::size_t output_channels,
     std::size_t kernel_height, std::size_t kernel_width, std::size_t stride) {
-  std::size_t output_height =
-      (input_height - kernel_height) / stride + 1;
+  std::size_t output_height = (input_height - kernel_height) / stride + 1;
   std::size_t output_width = (input_width - kernel_width) / stride + 1;
   std::vector<float> output(batch_count * output_channels * output_height *
                             output_width);
 
   for (std::size_t batch = 0; batch < batch_count; batch++) {
-    for (std::size_t output_channel = 0;
-         output_channel < output_channels; output_channel++) {
+    for (std::size_t output_channel = 0; output_channel < output_channels;
+         output_channel++) {
       for (std::size_t output_y = 0; output_y < output_height; output_y++) {
         for (std::size_t output_x = 0; output_x < output_width; output_x++) {
           float sum = bias[output_channel];
-          for (std::size_t input_channel = 0;
-               input_channel < input_channels; input_channel++) {
+          for (std::size_t input_channel = 0; input_channel < input_channels;
+               input_channel++) {
             for (std::size_t kernel_y = 0; kernel_y < kernel_height;
                  kernel_y++) {
               for (std::size_t kernel_x = 0; kernel_x < kernel_width;
@@ -73,18 +72,17 @@ std::vector<float> convolution2dTransposeReference(
     std::size_t kernel_height, std::size_t kernel_width, std::size_t stride,
     std::size_t padding, std::size_t output_padding, std::size_t dilation) {
   std::size_t output_height = (input_height - 1) * stride - 2 * padding +
-                              dilation * (kernel_height - 1) +
-                              output_padding + 1;
+                              dilation * (kernel_height - 1) + output_padding +
+                              1;
   std::size_t output_width = (input_width - 1) * stride - 2 * padding +
-                             dilation * (kernel_width - 1) + output_padding +
-                             1;
+                             dilation * (kernel_width - 1) + output_padding + 1;
   std::vector<float> output(batch_count * output_channels * output_height *
                             output_width);
 
   // Start every output position with its channel bias.
   for (std::size_t batch = 0; batch < batch_count; batch++) {
-    for (std::size_t output_channel = 0;
-         output_channel < output_channels; output_channel++) {
+    for (std::size_t output_channel = 0; output_channel < output_channels;
+         output_channel++) {
       for (std::size_t output_y = 0; output_y < output_height; output_y++) {
         for (std::size_t output_x = 0; output_x < output_width; output_x++) {
           std::size_t output_index =
@@ -109,8 +107,8 @@ std::vector<float> convolution2dTransposeReference(
                input_y) *
                   input_width +
               input_x;
-          for (std::size_t output_channel = 0;
-               output_channel < output_channels; output_channel++) {
+          for (std::size_t output_channel = 0; output_channel < output_channels;
+               output_channel++) {
             for (std::size_t kernel_y = 0; kernel_y < kernel_height;
                  kernel_y++) {
               for (std::size_t kernel_x = 0; kernel_x < kernel_width;
@@ -180,21 +178,20 @@ bool testConvolution2d(sycl::queue queue) {
   constexpr std::size_t kernel_width = 2;
   constexpr std::size_t stride = 1;
   const std::vector<float> input_values{
-      1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
-      -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15,
-      -16};
-  const std::vector<float> weight_values{
-      1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0,
-      1, 0, 0, 1, 2, 0, 0, 2, -1, 1, 1, -1};
+      1,  2,  3,  4,  5,  6,  7,  8,  9,  10,  11,  12,  13,  14,  15,  16,
+      -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16};
+  const std::vector<float> weight_values{1, 0, 0, 1, 1, 1, 1, 1, 0,  1, 1, 0,
+                                         1, 0, 0, 1, 2, 0, 0, 2, -1, 1, 1, -1};
   const std::vector<float> bias_values{0.0f, 1.0f, -2.0f};
   const std::vector<float> expected = convolution2dReference(
       input_values, weight_values, bias_values, batch_count, input_channels,
       input_height, input_width, output_channels, kernel_height, kernel_width,
       stride);
 
-  // These tensors store the input, learned kernels, and learned bias on the GPU.
-  flib::ftensor input(
-      {batch_count, input_channels, input_height, input_width}, queue);
+  // These tensors store the input, learned kernels, and learned bias on the
+  // GPU.
+  flib::ftensor input({batch_count, input_channels, input_height, input_width},
+                      queue);
   flib::ftensor weight(
       {output_channels, input_channels, kernel_height, kernel_width}, queue);
   flib::ftensor bias({output_channels}, queue);
@@ -206,8 +203,8 @@ bool testConvolution2d(sycl::queue queue) {
       flib::operations::convolution2d(input, weight, bias, stride, queue);
   std::vector<float> actual = output.to_host(queue);
   std::vector<std::size_t> expected_shape{1, 3, 3, 3};
-  bool passed = output.getShape() == expected_shape &&
-                compareValues(actual, expected);
+  bool passed =
+      output.getShape() == expected_shape && compareValues(actual, expected);
   std::cout << (passed ? "Passed convolution2d" : "Failed convolution2d")
             << std::endl;
   return passed;
@@ -226,9 +223,8 @@ bool testConvolution2dTranspose(sycl::queue queue) {
   constexpr std::size_t output_padding = 0;
   constexpr std::size_t dilation = 1;
   const std::vector<float> input_values{1, 2, 3, 4, -1, -2, -3, -4};
-  const std::vector<float> weight_values{
-      1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0,
-      1, 0, 0, 1, 2, 0, 0, 2, -1, 1, 1, -1};
+  const std::vector<float> weight_values{1, 0, 0, 1, 1, 1, 1, 1, 0,  1, 1, 0,
+                                         1, 0, 0, 1, 2, 0, 0, 2, -1, 1, 1, -1};
   const std::vector<float> bias_values{0.0f, 1.0f, -2.0f};
   const std::vector<float> expected = convolution2dTransposeReference(
       input_values, weight_values, bias_values, batch_count, input_channels,
@@ -236,8 +232,8 @@ bool testConvolution2dTranspose(sycl::queue queue) {
       stride, padding, output_padding, dilation);
 
   // Transposed convolution weights use [Cin, Cout, KH, KW].
-  flib::ftensor input(
-      {batch_count, input_channels, input_height, input_width}, queue);
+  flib::ftensor input({batch_count, input_channels, input_height, input_width},
+                      queue);
   flib::ftensor weight(
       {input_channels, output_channels, kernel_height, kernel_width}, queue);
   flib::ftensor bias({output_channels}, queue);
@@ -249,8 +245,8 @@ bool testConvolution2dTranspose(sycl::queue queue) {
       input, weight, bias, stride, padding, output_padding, dilation, queue);
   std::vector<float> actual = output.to_host(queue);
   std::vector<std::size_t> expected_shape{1, 3, 4, 4};
-  bool passed = output.getShape() == expected_shape &&
-                compareValues(actual, expected);
+  bool passed =
+      output.getShape() == expected_shape && compareValues(actual, expected);
   std::cout << (passed ? "Passed convolution2dTranspose"
                        : "Failed convolution2dTranspose")
             << std::endl;

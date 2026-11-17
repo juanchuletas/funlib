@@ -6,8 +6,7 @@
 namespace flib::operations {
 
 template <typename T>
-Tensor<T> interpolate_bicubic(const Tensor<T> &input,
-                              std::size_t output_height,
+Tensor<T> interpolate_bicubic(const Tensor<T> &input, std::size_t output_height,
                               std::size_t output_width, sycl::queue Q,
                               sycl::event *kernel_event = nullptr);
 

@@ -6,9 +6,8 @@
 namespace flib::operations {
 
 template <typename T>
-Tensor<T> triplane_sample(const Tensor<T> &triplane,
-                          const Tensor<T> &positions, sycl::queue Q,
-                          sycl::event *kernel_event = nullptr);
+Tensor<T> triplane_sample(const Tensor<T> &triplane, const Tensor<T> &positions,
+                          sycl::queue Q, sycl::event *kernel_event = nullptr);
 
 } // namespace flib::operations
 

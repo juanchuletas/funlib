@@ -8,8 +8,8 @@ namespace flib::operations {
 
 template <typename T>
 Tensor<T> convolution2d(const Tensor<T> &input, const Tensor<T> &weight,
-                      const Tensor<T> &bias, std::size_t stride,
-                      sycl::queue queue, sycl::event *kernel_event) {
+                        const Tensor<T> &bias, std::size_t stride,
+                        sycl::queue queue, sycl::event *kernel_event) {
   // Check the required NCHW input and OIHW weight layouts.
   if (input.getRank() != 4) {
     throw std::invalid_argument(
@@ -56,8 +56,7 @@ Tensor<T> convolution2d(const Tensor<T> &input, const Tensor<T> &weight,
         "Convolution kernel cannot be larger than the input");
   }
   if (!input.is_device() || !weight.is_device() || !bias.is_device()) {
-    throw std::invalid_argument(
-        "Convolution requires device tensors");
+    throw std::invalid_argument("Convolution requires device tensors");
   }
   if (!input.is_accessible_from(queue) || !weight.is_accessible_from(queue) ||
       !bias.is_accessible_from(queue)) {
@@ -66,8 +65,7 @@ Tensor<T> convolution2d(const Tensor<T> &input, const Tensor<T> &weight,
   }
 
   // This first version uses no padding and dilation equal to one.
-  std::size_t output_height =
-      (input_height - kernel_height) / stride + 1;
+  std::size_t output_height = (input_height - kernel_height) / stride + 1;
   std::size_t output_width = (input_width - kernel_width) / stride + 1;
   std::vector<std::size_t> output_shape{batch_count, output_channels,
                                         output_height, output_width};
@@ -107,7 +105,11 @@ Tensor<T> convolution2d(const Tensor<T> &input, const Tensor<T> &weight,
           for (std::size_t kernel_x = 0; kernel_x < kernel_width; kernel_x++) {
             std::size_t input_y = output_y * stride + kernel_y;
             std::size_t input_x = output_x * stride + kernel_x;
-            std::size_t input_index = ((batch * input_channels + input_channel) * input_height + input_y) * input_width + input_x;
+            std::size_t input_index =
+                ((batch * input_channels + input_channel) * input_height +
+                 input_y) *
+                    input_width +
+                input_x;
             std::size_t weight_index =
                 ((output_channel * input_channels + input_channel) *
                      kernel_height +
@@ -129,10 +131,12 @@ Tensor<T> convolution2d(const Tensor<T> &input, const Tensor<T> &weight,
 }
 
 template <typename T>
-Tensor<T> convolution2dTranspose(
-    const Tensor<T> &input, const Tensor<T> &weight, const Tensor<T> &bias,
-    std::size_t stride, std::size_t padding, std::size_t output_padding,
-    std::size_t dilation, sycl::queue queue, sycl::event *kernel_event) {
+Tensor<T> convolution2dTranspose(const Tensor<T> &input,
+                                 const Tensor<T> &weight, const Tensor<T> &bias,
+                                 std::size_t stride, std::size_t padding,
+                                 std::size_t output_padding,
+                                 std::size_t dilation, sycl::queue queue,
+                                 sycl::event *kernel_event) {
   // Check the required NCHW input and IOHW weight layouts.
   if (input.getRank() != 4) {
     throw std::invalid_argument(
@@ -179,8 +183,8 @@ Tensor<T> convolution2dTranspose(
         "Transposed convolution dimensions cannot be zero");
   }
   if (input_channels != weight_input_channels) {
-    throw std::invalid_argument(
-        "Transposed convolution input channels must match the weight input channels");
+    throw std::invalid_argument("Transposed convolution input channels must "
+                                "match the weight input channels");
   }
   if (bias.getSize() != output_channels) {
     throw std::invalid_argument(
@@ -212,13 +216,12 @@ Tensor<T> convolution2dTranspose(
         "Transposed convolution output dimensions must be positive");
   }
 
-  std::size_t output_height_size =
-      static_cast<std::size_t>(output_height);
+  std::size_t output_height_size = static_cast<std::size_t>(output_height);
   std::size_t output_width_size = static_cast<std::size_t>(output_width);
   std::vector<std::size_t> output_shape{batch_count, output_channels,
                                         output_height_size, output_width_size};
-  std::size_t output_size = batch_count * output_channels *
-                            output_height_size * output_width_size;
+  std::size_t output_size =
+      batch_count * output_channels * output_height_size * output_width_size;
 
   Tensor<T> output(output_shape, queue);
   if (output_size == 0) {
@@ -310,16 +313,17 @@ template Tensor<int> convolution2d(const Tensor<int> &, const Tensor<int> &,
                                    const Tensor<int> &, std::size_t,
                                    sycl::queue, sycl::event *);
 
-template Tensor<double> convolution2dTranspose(
-    const Tensor<double> &, const Tensor<double> &, const Tensor<double> &,
-    std::size_t, std::size_t, std::size_t, std::size_t, sycl::queue,
-    sycl::event *);
-template Tensor<float> convolution2dTranspose(
-    const Tensor<float> &, const Tensor<float> &, const Tensor<float> &,
-    std::size_t, std::size_t, std::size_t, std::size_t, sycl::queue,
-    sycl::event *);
-template Tensor<int> convolution2dTranspose(
-    const Tensor<int> &, const Tensor<int> &, const Tensor<int> &, std::size_t,
-    std::size_t, std::size_t, std::size_t, sycl::queue, sycl::event *);
+template Tensor<double>
+convolution2dTranspose(const Tensor<double> &, const Tensor<double> &,
+                       const Tensor<double> &, std::size_t, std::size_t,
+                       std::size_t, std::size_t, sycl::queue, sycl::event *);
+template Tensor<float>
+convolution2dTranspose(const Tensor<float> &, const Tensor<float> &,
+                       const Tensor<float> &, std::size_t, std::size_t,
+                       std::size_t, std::size_t, sycl::queue, sycl::event *);
+template Tensor<int>
+convolution2dTranspose(const Tensor<int> &, const Tensor<int> &,
+                       const Tensor<int> &, std::size_t, std::size_t,
+                       std::size_t, std::size_t, sycl::queue, sycl::event *);
 
 } // namespace flib::operations

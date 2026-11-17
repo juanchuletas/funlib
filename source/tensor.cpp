@@ -331,5 +331,7 @@ template <typename T> void Tensor<T>::print() const {
 template class Tensor<double>;
 template class Tensor<float>;
 template class Tensor<int>;
+template class Tensor<std::uint8_t>;
+template class Tensor<std::uint32_t>;
 
 }; // namespace flib
