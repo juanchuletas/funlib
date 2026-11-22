@@ -133,13 +133,14 @@ void benchmarkShape(std::size_t M, std::size_t K, std::size_t N,
             << std::endl;
 }
 
+
 int main() {
   flib::sycl_handler::register_queue("cuda", flib::device::GPU,
                                      flib::vendor::NVIDIA, flib::backend::CUDA,
                                      true);
   sycl::queue m_queue = flib::sycl_handler::get_queue("cuda");
-  flib::sycl_handler::get_device_info("cuda");
-
+  flib::sycl_handler::get_device_info("cuda");  
+  flib::sycl_handler::enable_joint_matrix("cuda");
   std::cout << std::fixed << std::setprecision(3);
   std::cout << "    M x    K x    N" << std::setw(18) << "Blocked total ms"
             << std::setw(18) << "Blocked kernel ms" << std::setw(18)

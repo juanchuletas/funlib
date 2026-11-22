@@ -14,44 +14,48 @@ class tensor_operations {
   // It is used to perform operations on the Tensor class
 public:
   template <typename T>
-  static Tensor<T> gemm(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q,
+  static Tensor<T> gemm(const Tensor<T> &A, const Tensor<T> &B, sycl::queue queue,
                         sycl::event *kernel_event = nullptr);
   template <typename T>
   static Tensor<T> gemm_naive(const Tensor<T> &A, const Tensor<T> &B,
-                              sycl::queue Q,
+                              sycl::queue queue,
                               sycl::event *kernel_event = nullptr);
   template <typename T>
   static Tensor<T> matxvec(const Tensor<T> &A, const Tensor<T> &B,
-                           sycl::queue Q, sycl::event *kernel_event = nullptr);
+                           sycl::queue queue, sycl::event *kernel_event = nullptr);
   template <typename T>
   static Tensor<T> gemmTiled(const Tensor<T> &A, const Tensor<T> &B,
-                             sycl::queue Q,
+                             sycl::queue queue,
                              sycl::event *kernel_event = nullptr);
   template <typename T>
   static Tensor<T> gemm_blocked2x2(const Tensor<T> &A, const Tensor<T> &B,
-                                   sycl::queue Q,
+                                   sycl::queue queue,
                                    sycl::event *kernel_event = nullptr);
   template <typename T>
   static Tensor<T> gemm_tiled_blocked2x2(const Tensor<T> &A, const Tensor<T> &B,
-                                         sycl::queue Q,
+                                         sycl::queue queue,
+                                         sycl::event *kernel_event = nullptr);
+  template <typename T>
+  static Tensor<T> gemm_joint_matrix_16x16x8(const Tensor<T> &A, const Tensor<T> &B,
+                                         sycl::queue queue,
                                          sycl::event *kernel_event = nullptr);
   template <typename T>
   static Tensor<T> permute(const Tensor<T> &input,
-                           const std::vector<std::size_t> &order, sycl::queue Q,
+                           const std::vector<std::size_t> &order, sycl::queue queue,
                            sycl::event *kernel_event = nullptr);
   template <typename T>
   static Tensor<T> concatenate(const Tensor<T> &left, const Tensor<T> &right,
-                               std::size_t axis, sycl::queue Q,
+                               std::size_t axis, sycl::queue queue,
                                sycl::event *kernel_event = nullptr);
   template <typename T>
   static Tensor<T> slice(const Tensor<T> &input, std::size_t dimension,
-                         std::size_t start, std::size_t end, sycl::queue Q,
+                         std::size_t start, std::size_t end, sycl::queue queue,
                          sycl::event *kernel_event = nullptr);
 
   // dot product of two vectors or two one dimensional sets
   template <typename T>
-  static T dot(const Tensor<T> &A, const Tensor<T> &B, sycl::queue Q);
-  template <typename T> static T reduction(const Tensor<T> &A, sycl::queue Q);
+  static T dot(const Tensor<T> &A, const Tensor<T> &B, sycl::queue queue);
+  template <typename T> static T reduction(const Tensor<T> &A, sycl::queue queue);
 
   // using traits:
   template <typename Left, typename Right>
@@ -73,7 +77,7 @@ public:
 private:
   template <typename T>
   static Tensor<T> gemm_batched_impl(const Tensor<T> &A, const Tensor<T> &B,
-                                     sycl::queue Q, bool transpose_A,
+                                     sycl::queue queue, bool transpose_A,
                                      bool transpose_B,
                                      sycl::event *kernel_event);
 };

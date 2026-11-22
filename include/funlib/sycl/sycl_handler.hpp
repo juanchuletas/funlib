@@ -1,7 +1,7 @@
 #if !defined(_SYCL_HANDLER_H_)
 #define _SYCL_HANDLER_H_
 #include <sycl/sycl.hpp>
-
+#include <sycl/ext/oneapi/matrix/matrix-unified.hpp>
 // SYCL must be included before GLX because X11 defines the None macro.
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
@@ -17,6 +17,11 @@ enum class device { GPU, CPU };
 enum class vendor { INTEL, NVIDIA };
 enum class backend { OPENCL, LEVEL_ZERO, CUDA };
 
+using matrix_type = sycl::ext::oneapi::experimental::matrix::matrix_type;
+  
+
+
+
 class sycl_handler {
 
   static sycl::device _device;
@@ -25,15 +30,17 @@ class sycl_handler {
   static cl_context _clCtx;
   static sycl::context _syclCtx;
   static std::map<std::string, sycl::queue> _queues;
-  static sycl::info::device_type
-  device_type_from_string(const std::string &type_str);
+  static sycl::info::device_type device_type_from_string(const std::string &type_str);
+  static bool supports_joint_matrix(const std::string& name_queue);
+  static void print_joint_matrix_combinations(const std::string& name_queue);
+  static const char *matrix_type_name(matrix_type type);
 
 protected:
+    inline static bool using_joint_matrix = false; //inline: turns into a full definition
 public:
   template <typename T, typename Func> friend class ParticleSystem;
 
   friend class tensor_operations;
-
   static void select_device(std::string device_name,
                             std::string device_type = "",
                             bool profiling = false);
@@ -52,6 +59,8 @@ public:
   static sycl::queue get_queue(const std::string &name);
   static cl_context get_clContext();
   static sycl::context get_sycl_context();
+  static void enable_joint_matrix(const std::string &queue_name);
+  
 };
 
 } // namespace flib

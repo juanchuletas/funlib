@@ -3,6 +3,8 @@
 #include <funlib/Tensor/tensor_operations.hpp>
 #include <funlib/detail/tensor_traits.hpp>
 #include <funlib/sycl/sycl_handler.hpp>
+#include <sycl/ext/oneapi/matrix/matrix-unified.hpp>
+
 
 namespace flib {
 template <typename T>
@@ -24,7 +26,7 @@ std::vector<std::size_t> gemm_output_shape(const Tensor<T> &A,
 
 template <typename T>
 Tensor<T> tensor_operations::gemm_naive(const Tensor<T> &A, const Tensor<T> &B,
-                                        sycl::queue Q,
+                                        sycl::queue queue,
                                         sycl::event *kernel_event) {
   std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
   // Assuming A is m x n
@@ -49,16 +51,16 @@ Tensor<T> tensor_operations::gemm_naive(const Tensor<T> &A, const Tensor<T> &B,
       throw std::invalid_argument(
           "GEMM inputs must use the same memory location");
     }
-    if (!A.is_accessible_from(Q) || !B.is_accessible_from(Q)) {
+    if (!A.is_accessible_from(queue) || !B.is_accessible_from(queue)) {
       throw std::invalid_argument("GEMM queue cannot access the input tensors");
     }
 
     const T *dataA = A.device_data();
     const T *dataB = B.device_data();
-    Tensor<T> C(output_shape, Q);
+    Tensor<T> C(output_shape, queue);
     T *dataC = C.device_data();
 
-    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+    sycl::event event = queue.submit([&](sycl::handler &cgh) {
       cgh.parallel_for(sycl::range<2>{rowsC, colsC}, [=](sycl::item<2> item) {
         size_t i = item.get_id(0);
         size_t j = item.get_id(1);
@@ -82,7 +84,7 @@ Tensor<T> tensor_operations::gemm_naive(const Tensor<T> &A, const Tensor<T> &B,
     sycl::buffer<T, 1> buffc = C.to_sycl_buffer();
     sycl::buffer<T, 1> buffa = A.to_sycl_buffer();
     sycl::buffer<T, 1> buffb = B.to_sycl_buffer();
-    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+    sycl::event event = queue.submit([&](sycl::handler &cgh) {
       auto acc_matC = buffc.template get_access<sycl::access::mode::write>(cgh);
       auto acc_matA = buffa.template get_access<sycl::access::mode::read>(cgh);
       auto acc_matB = buffb.template get_access<sycl::access::mode::read>(cgh);
@@ -111,7 +113,7 @@ Tensor<T> tensor_operations::gemm_naive(const Tensor<T> &A, const Tensor<T> &B,
 
 template <typename T>
 Tensor<T> tensor_operations::gemmTiled(const Tensor<T> &A, const Tensor<T> &B,
-                                       sycl::queue Q,
+                                       sycl::queue queue,
                                        sycl::event *kernel_event) {
   std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
   // Assuming A is m x n
@@ -138,17 +140,17 @@ Tensor<T> tensor_operations::gemmTiled(const Tensor<T> &A, const Tensor<T> &B,
       throw std::invalid_argument(
           "GEMM inputs must use the same memory location");
     }
-    if (!A.is_accessible_from(Q) || !B.is_accessible_from(Q)) {
+    if (!A.is_accessible_from(queue) || !B.is_accessible_from(queue)) {
       throw std::invalid_argument("GEMM queue cannot access the input tensors");
     }
     const T *dataA = A.device_data();
     const T *dataB = B.device_data();
-    Tensor<T> C(output_shape, Q); // device output tensor
+    Tensor<T> C(output_shape, queue); // device output tensor
     T *dataC = C.device_data();
     //
     sycl::range<2> global_range{global_rows, global_cols};
     sycl::range<2> local_range{tile_size, tile_size};
-    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+    sycl::event event = queue.submit([&](sycl::handler &cgh) {
       sycl::local_accessor<T, 1> tileA(sycl::range<1>{tile_size * tile_size},
                                        cgh);
       sycl::local_accessor<T, 1> tileB(sycl::range<1>{tile_size * tile_size},
@@ -193,7 +195,7 @@ Tensor<T> tensor_operations::gemmTiled(const Tensor<T> &A, const Tensor<T> &B,
     sycl::buffer<T, 1> buffc = C.to_sycl_buffer();
     sycl::buffer<T, 1> buffa = A.to_sycl_buffer();
     sycl::buffer<T, 1> buffb = B.to_sycl_buffer();
-    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+    sycl::event event = queue.submit([&](sycl::handler &cgh) {
       auto acc_matC = buffc.template get_access<sycl::access::mode::write>(cgh);
       auto acc_matA = buffa.template get_access<sycl::access::mode::read>(cgh);
       auto acc_matB = buffb.template get_access<sycl::access::mode::read>(cgh);
@@ -242,7 +244,7 @@ Tensor<T> tensor_operations::gemmTiled(const Tensor<T> &A, const Tensor<T> &B,
 
 template <typename T>
 Tensor<T> tensor_operations::gemm_blocked2x2(const Tensor<T> &A,
-                                             const Tensor<T> &B, sycl::queue Q,
+                                             const Tensor<T> &B, sycl::queue queue,
                                              sycl::event *kernel_event) {
   std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
   /*
@@ -271,7 +273,7 @@ Tensor<T> tensor_operations::gemm_blocked2x2(const Tensor<T> &A,
   if (!A.is_device() || !B.is_device()) {
     throw std::invalid_argument("Blocked GEMM requires device tensors");
   }
-  if (!A.is_accessible_from(Q) || !B.is_accessible_from(Q)) {
+  if (!A.is_accessible_from(queue) || !B.is_accessible_from(queue)) {
     throw std::invalid_argument("GEMM queue cannot access the input tensors");
   }
   const T *dataA = A.device_data(); // get the device data pointer for A
@@ -289,10 +291,10 @@ Tensor<T> tensor_operations::gemm_blocked2x2(const Tensor<T> &A,
   sycl::range<2> global_size{global_rows, global_cols};
   sycl::range<2> local_size{work_group_size, work_group_size};
 
-  Tensor<T> C(output_shape, Q); // device output tensor
+  Tensor<T> C(output_shape, queue); // device output tensor
   T *dataC = C.device_data();
 
-  sycl::event event = Q.submit([&](sycl::handler &cgh) {
+  sycl::event event = queue.submit([&](sycl::handler &cgh) {
     cgh.parallel_for(
         sycl::nd_range<2>{global_size, local_size}, [=](sycl::nd_item<2> item) {
           size_t row = item.get_global_id(0) * block_size;
@@ -342,7 +344,7 @@ Tensor<T> tensor_operations::gemm_blocked2x2(const Tensor<T> &A,
 template <typename T>
 Tensor<T> tensor_operations::gemm_tiled_blocked2x2(const Tensor<T> &A,
                                                    const Tensor<T> &B,
-                                                   sycl::queue Q,
+                                                   sycl::queue queue,
                                                    sycl::event *kernel_event) {
   std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
   // Assuming A is m x n
@@ -364,7 +366,7 @@ Tensor<T> tensor_operations::gemm_tiled_blocked2x2(const Tensor<T> &A,
   if (!A.is_device() || !B.is_device()) {
     throw std::invalid_argument("Tiled blocked GEMM requires device tensors");
   }
-  if (!A.is_accessible_from(Q) || !B.is_accessible_from(Q)) {
+  if (!A.is_accessible_from(queue) || !B.is_accessible_from(queue)) {
     throw std::invalid_argument("GEMM queue cannot access the input tensors");
   }
 
@@ -379,12 +381,12 @@ Tensor<T> tensor_operations::gemm_tiled_blocked2x2(const Tensor<T> &A,
 
   const T *dataA = A.device_data();
   const T *dataB = B.device_data();
-  Tensor<T> C(output_shape, Q); // device output tensor
+  Tensor<T> C(output_shape, queue); // device output tensor
   T *dataC = C.device_data();
   sycl::range<2> global_range{global_rows, global_cols};
   sycl::range<2> local_range{tile_size, tile_size};
 
-  sycl::event event = Q.submit([&](sycl::handler &cgh) {
+  sycl::event event = queue.submit([&](sycl::handler &cgh) {
     sycl::local_accessor<T, 1> tileA(
         sycl::range<1>{output_tile_size * tile_size}, cgh);
     sycl::local_accessor<T, 1> tileB(
@@ -469,8 +471,102 @@ Tensor<T> tensor_operations::gemm_tiled_blocked2x2(const Tensor<T> &A,
 }
 
 template <typename T>
+Tensor<T> tensor_operations::gemm_joint_matrix_16x16x8(
+    const Tensor<T> &A, const Tensor<T> &B, sycl::queue queue,
+    sycl::event *kernel_event) {
+  using namespace sycl::ext::oneapi::experimental;
+  using namespace sycl::ext::oneapi::experimental::matrix;
+
+  // Tiled size:
+  constexpr std::size_t M = 16;
+  constexpr std::size_t N = 16;
+  constexpr std::size_t K = 8;
+
+  constexpr std::size_t subgroup_size = 32;
+  sycl::range<1> local{subgroup_size};
+
+  if (!A.is_device() || !B.is_device()) {
+    throw std::invalid_argument(
+        "Joint-matrix GEMM requires device tensors");
+  }
+  if (!A.is_accessible_from(queue) || !B.is_accessible_from(queue)) {
+    throw std::invalid_argument(
+        "Joint-matrix GEMM queue cannot access the input tensors");
+  }
+  if (A.getCols() != B.getRows()) {
+    throw std::invalid_argument(
+        "Tensor dimensions do not match for multiplication");
+  }
+  if (A.getRows() % M != 0 || A.getCols() % K != 0 ||
+      B.getCols() % N != 0) {
+    throw std::invalid_argument(
+        "TF32 joint-matrix GEMM requires tile-aligned dimensions");
+  }
+
+  std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
+  const std::size_t rowsA = A.getRows();
+  const std::size_t colsA = A.getCols();
+  const std::size_t colsB = B.getCols();
+  const std::size_t row_tiles = rowsA / M;
+  const std::size_t col_tiles = colsB / N;
+  const std::size_t tile_count = row_tiles * col_tiles;
+  sycl::range<1> global{tile_count * subgroup_size};
+  const T *dataA = A.device_data();
+  const T *dataB = B.device_data();
+  Tensor<T> C(output_shape, queue); // device output tensor
+  T *dataC = C.device_data();
+  sycl::event event = queue.submit([&](sycl::handler &h) {
+    h.parallel_for(
+        sycl::nd_range<1>(global, local),
+        [=](sycl::nd_item<1> item)
+            [[sycl::reqd_sub_group_size(subgroup_size)]] {
+        sycl::sub_group sg  = item.get_sub_group();
+
+        const std::size_t tile_id = item.get_group(0);
+        const std::size_t tile_row = tile_id / col_tiles;
+        const std::size_t tile_col = tile_id % col_tiles;
+        const std::size_t row = tile_row * M;
+        const std::size_t col = tile_col * N;
+
+        joint_matrix<sycl::sub_group,precision::tf32,use::a,M,K,layout::row_major> a_mat_tile;
+        joint_matrix<sycl::sub_group,precision::tf32,use::b,K,N,layout::row_major> b_mat_tile;
+        joint_matrix<sycl::sub_group,float,use::accumulator,M,N> c_mat_tile;
+
+        joint_matrix_fill(sg,c_mat_tile, 0.0f);
+
+        for (std::size_t k = 0; k < colsA; k += K) {
+          auto a_ptr = sycl::address_space_cast<
+                      sycl::access::address_space::global_space,
+                      sycl::access::decorated::no>(dataA + row * colsA + k);
+
+          auto b_ptr = sycl::address_space_cast<
+                      sycl::access::address_space::global_space,
+                      sycl::access::decorated::no>(dataB + k * colsB + col);
+
+          joint_matrix_load(sg, a_mat_tile, a_ptr, colsA);
+          joint_matrix_load(sg, b_mat_tile, b_ptr, colsB);
+          joint_matrix_mad(sg, c_mat_tile, a_mat_tile, b_mat_tile,
+                           c_mat_tile);
+        }
+
+        auto c_ptr = sycl::address_space_cast<
+            sycl::access::address_space::global_space,
+            sycl::access::decorated::no>(dataC + row * colsB + col);
+        joint_matrix_store(sg, c_mat_tile, c_ptr, colsB,
+                           layout::row_major);
+      });
+  });
+
+  if (kernel_event != nullptr) {
+    *kernel_event = event;
+  }
+  event.wait();
+  return C;
+}
+template <typename T>
 Tensor<T> tensor_operations::matxvec(const Tensor<T> &A, const Tensor<T> &B,
-                                     sycl::queue Q, sycl::event *kernel_event) {
+                                     sycl::queue queue,
+                                     sycl::event *kernel_event) {
   std::vector<std::size_t> output_shape = gemm_output_shape(A, B);
   size_t colsA = static_cast<size_t>(A.getCols());
   size_t rowsA = static_cast<size_t>(A.getRows());
@@ -489,17 +585,17 @@ Tensor<T> tensor_operations::matxvec(const Tensor<T> &A, const Tensor<T> &B,
       throw std::invalid_argument(
           "Matrix vector inputs must use the same memory location");
     }
-    if (!A.is_accessible_from(Q) || !B.is_accessible_from(Q)) {
+    if (!A.is_accessible_from(queue) || !B.is_accessible_from(queue)) {
       throw std::invalid_argument(
           "Matrix vector queue cannot access the input tensors");
     }
 
     const T *dataA = A.device_data();
     const T *dataB = B.device_data();
-    Tensor<T> C(output_shape, Q);
+    Tensor<T> C(output_shape, queue);
     T *dataC = C.device_data();
 
-    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+    sycl::event event = queue.submit([&](sycl::handler &cgh) {
       cgh.parallel_for(sycl::range<1>{rowsA}, [=](sycl::item<1> item) {
         size_t i = item.get_id(0);
         T sum = T(0);
@@ -522,7 +618,7 @@ Tensor<T> tensor_operations::matxvec(const Tensor<T> &A, const Tensor<T> &B,
     sycl::buffer<T, 1> buffc = C.to_sycl_buffer();
     sycl::buffer<T, 1> buffa = A.to_sycl_buffer();
     sycl::buffer<T, 1> buffb = B.to_sycl_buffer();
-    sycl::event event = Q.submit([&](sycl::handler &cgh) {
+    sycl::event event = queue.submit([&](sycl::handler &cgh) {
       auto acc_matC = buffc.template get_access<sycl::access::mode::write>(cgh);
       auto acc_matA = buffa.template get_access<sycl::access::mode::read>(cgh);
       auto acc_matB = buffb.template get_access<sycl::access::mode::read>(cgh);
@@ -545,46 +641,53 @@ Tensor<T> tensor_operations::matxvec(const Tensor<T> &A, const Tensor<T> &B,
 
 template <typename T>
 Tensor<T> tensor_operations::gemm(const Tensor<T> &A, const Tensor<T> &B,
-                                  sycl::queue Q, sycl::event *kernel_event) {
+                                  sycl::queue queue, sycl::event *kernel_event) {
   if (A.is_device() != B.is_device()) {
     throw std::invalid_argument(
         "GEMM inputs must use the same memory location");
   }
 
   if (A.is_host()) {
-    return gemm_naive(A, B, Q, kernel_event);
+    return gemm_naive(A, B, queue, kernel_event);
   }
 
   if (B.getCols() == 1) {
-    return matxvec(A, B, Q, kernel_event);
+    return matxvec(A, B, queue, kernel_event);
   }
 
-  sycl::device selected_device = Q.get_device();
+  sycl::device selected_device = queue.get_device();
   if (!selected_device.is_gpu()) {
-    return gemm_naive(A, B, Q, kernel_event);
+    return gemm_naive(A, B, queue, kernel_event);
   }
 
-  sycl::backend selected_backend = Q.get_backend();
+  sycl::backend selected_backend = queue.get_backend();
   if (selected_backend == sycl::backend::ext_oneapi_cuda) {
-    return gemm_blocked2x2(A, B, Q, kernel_event);
+    if constexpr (std::is_same_v<T, float>) {
+      if (sycl_handler::using_joint_matrix && A.getRows() % 16 == 0 &&
+          A.getCols() % 8 == 0 && B.getRows() == A.getCols() &&
+          B.getCols() % 16 == 0) {
+        return gemm_joint_matrix_16x16x8(A, B, queue, kernel_event);
+      }
+    }
+    return gemm_blocked2x2(A, B, queue, kernel_event);
   }
   if (selected_backend == sycl::backend::ext_oneapi_level_zero) {
     if (A.getCols() <= 64) {
-      return gemmTiled(A, B, Q, kernel_event);
+      return gemmTiled(A, B, queue, kernel_event);
     }
-    return gemm_tiled_blocked2x2(A, B, Q, kernel_event);
+    return gemm_tiled_blocked2x2(A, B, queue, kernel_event);
   }
   if (selected_backend == sycl::backend::opencl) {
-    return gemm_tiled_blocked2x2(A, B, Q, kernel_event);
+    return gemm_tiled_blocked2x2(A, B, queue, kernel_event);
   }
 
-  return gemmTiled(A, B, Q, kernel_event);
+  return gemmTiled(A, B, queue, kernel_event);
 }
 
 template <typename T>
 Tensor<T> tensor_operations::permute(const Tensor<T> &input,
                                      const std::vector<std::size_t> &order,
-                                     sycl::queue Q, sycl::event *kernel_event) {
+                                     sycl::queue queue, sycl::event *kernel_event) {
   constexpr std::size_t maximum_rank = 16;
   std::size_t rank = input.getRank();
   if (rank == 0 || rank > maximum_rank) {
@@ -636,11 +739,11 @@ Tensor<T> tensor_operations::permute(const Tensor<T> &input,
     return output;
   }
 
-  if (!input.is_accessible_from(Q)) {
+  if (!input.is_accessible_from(queue)) {
     throw std::invalid_argument("Permute queue cannot access the input tensor");
   }
 
-  Tensor<T> output(output_shape, Q);
+  Tensor<T> output(output_shape, queue);
   const T *input_data = input.device_data();
   T *output_data = output.device_data();
   std::size_t total_size = input.getSize();
@@ -649,7 +752,7 @@ Tensor<T> tensor_operations::permute(const Tensor<T> &input,
     return output;
   }
 
-  sycl::event event = Q.submit([&](sycl::handler &cgh) {
+  sycl::event event = queue.submit([&](sycl::handler &cgh) {
     cgh.parallel_for(sycl::range<1>{total_size}, [=](sycl::item<1> item) {
       std::size_t output_index = item.get_id(0);
       std::size_t remaining = output_index;
@@ -672,8 +775,8 @@ Tensor<T> tensor_operations::permute(const Tensor<T> &input,
 
 template <typename T>
 T tensor_operations::dot(const Tensor<T> &A, const Tensor<T> &B,
-                         sycl::queue Q) {
-  (void)Q;
+                         sycl::queue queue) {
+  (void)queue;
   size_t colsA = static_cast<size_t>(A.getCols());
   size_t rowsA = static_cast<size_t>(A.getRows());
   size_t colsB = static_cast<size_t>(B.getCols());
@@ -692,7 +795,7 @@ T tensor_operations::dot(const Tensor<T> &A, const Tensor<T> &B,
   return result;
 }
 template <typename T>
-T tensor_operations::reduction(const Tensor<T> &A, sycl::queue Q) {
+T tensor_operations::reduction(const Tensor<T> &A, sycl::queue queue) {
   // Assuming A is a 1D vector or 1D list.
   if (A.getCols() != 1 && A.getRows() != 1) {
     // If the input is not a 1D vector or list, throw an error.
@@ -715,7 +818,7 @@ T tensor_operations::reduction(const Tensor<T> &A, sycl::queue Q) {
     sycl::buffer<T, 1> buffA = A.to_sycl_buffer();
     sycl::buffer<T, 1> partial_sum = partial.to_sycl_buffer();
 
-    Q.submit([&](sycl::handler &cgh) {
+    queue.submit([&](sycl::handler &cgh) {
        auto acc_global =
            buffA.template get_access<sycl::access::mode::read>(cgh);
        auto acc_partial_sum =
@@ -836,6 +939,8 @@ template Tensor<float> tensor_operations::gemm_tiled_blocked2x2(
     const Tensor<float> &, const Tensor<float> &, sycl::queue, sycl::event *);
 template Tensor<int> tensor_operations::gemm_tiled_blocked2x2(
     const Tensor<int> &, const Tensor<int> &, sycl::queue, sycl::event *);
+template Tensor<float> tensor_operations::gemm_joint_matrix_16x16x8(
+    const Tensor<float> &, const Tensor<float> &, sycl::queue, sycl::event *);
 template Tensor<double>
 tensor_operations::permute(const Tensor<double> &,
                            const std::vector<std::size_t> &, sycl::queue,
