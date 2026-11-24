@@ -351,19 +351,6 @@ Current limits include:
 7. Some linear algebra operations still use CPU tensors.
 8. The build configuration contains local compiler paths.
 
-## Roadmap
-
-The next main steps are:
-
-1. Complete correctness tests for all GEMM methods.
-2. Compare all GEMM methods under the same benchmark conditions.
-3. Test more tile sizes and register block sizes.
-4. Add device and matrix based GEMM selection.
-5. Add transpose and packed tensor layouts.
-6. Add batched GEMM.
-7. Add the operations needed for transformer inference.
-8. Add training support after inference operations are stable.
-
 ## License
 
 Funlib is available under the APACHE License.
