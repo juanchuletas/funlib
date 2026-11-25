@@ -356,6 +356,92 @@ sycl::queue flib::sycl_handler::get_queue() { return _queue; }
 cl_context flib::sycl_handler::get_clContext() { return _clCtx; }
 sycl::context flib::sycl_handler::get_sycl_context() { return _syclCtx; }
 // Initialize static members
+void flib::sycl_handler::enable_joint_matrix(const std::string& queue_name) {
+  if(supports_joint_matrix(queue_name)){
+    using_joint_matrix = true;
+    std::cout<<"Joint matrix feature enabled\n"; 
+    print_joint_matrix_combinations(queue_name);
+  }
+  else{
+    std::cout<<"Hardware does not contain XMX or Tensor Cores\n";
+  }
+
+}
+bool flib::sycl_handler::supports_joint_matrix(const std::string& name_queue) {
+  auto dev = _queues[name_queue].get_device();
+
+#ifdef SYCL_EXT_ONEAPI_MATRIX
+  try {
+    auto combinations =
+        dev.get_info<sycl::ext::oneapi::experimental::info::device::matrix_combinations>();
+    // If the returned vector is non-empty, the device has matrix hardware
+    return !combinations.empty();
+  } catch (const sycl::exception&) {
+    return false;
+  }
+#else
+  return false;
+#endif
+}
+void flib::sycl_handler::print_joint_matrix_combinations(const std::string& name_queue) {
+
+  auto device = _queues[name_queue].get_device();
+  #ifdef SYCL_EXT_ONEAPI_MATRIX
+  using combination =
+      sycl::ext::oneapi::experimental::matrix::combination;
+
+  try {
+    auto combinations =
+        device.get_info<
+            sycl::ext::oneapi::experimental::info::device::
+                matrix_combinations>();
+
+    std::cout << "Joint-matrix combinations:\n";
+
+    for (const combination &c : combinations) {
+      std::cout << "  A: " << matrix_type_name(c.atype)
+                << ", B: " << matrix_type_name(c.btype)
+                << ", C: " << matrix_type_name(c.ctype)
+                << ", D: " << matrix_type_name(c.dtype)
+                << ", shape: " << c.msize << "x" << c.nsize << "x"
+                << c.ksize
+                << ", max shape: " << c.max_msize << "x"
+                << c.max_nsize << "x" << c.max_ksize << '\n';
+    }
+  } catch (const sycl::exception &error) {
+    std::cout << "Could not query joint-matrix combinations: "
+              << error.what() << '\n';
+  }
+#else
+  std::cout << "SYCL matrix extension is not available at compile time\n";
+#endif
+}
+const char *flib::sycl_handler::matrix_type_name(matrix_type type) {
+  using namespace sycl::ext::oneapi::experimental::matrix;
+
+  switch (type) {
+  case matrix_type::bf16:
+    return "bf16";
+  case matrix_type::fp16:
+    return "fp16";
+  case matrix_type::tf32:
+    return "tf32";
+  case matrix_type::fp32:
+    return "fp32";
+  case matrix_type::fp64:
+    return "fp64";
+  case matrix_type::sint8:
+    return "sint8";
+  case matrix_type::sint32:
+    return "sint32";
+  case matrix_type::uint8:
+    return "uint8";
+  case matrix_type::uint32:
+    return "uint32";
+  default:
+    return "other";
+  }
+}
 sycl::device flib::sycl_handler::_device;
 sycl::platform flib::sycl_handler::_platform;
 cl_context flib::sycl_handler::_clCtx = nullptr;
